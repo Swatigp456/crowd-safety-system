@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}My Profile - Crowd Safety System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                {% if user.profile_picture %}
+                    <img src="{{ user.profile_picture.url }}" class="rounded-circle img-fluid mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                {% else %}
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 150px; height: 150px;">
+                        <i class="fas fa-user fa-4x"></i>
+                    </div>
+                {% endif %}
+                <h4>{{ user.get_full_name|default:user.username }}</h4>
+                <p class="text-muted">
+                    <span class="badge bg-{% if user.role == 'admin' %}danger{% elif user.role == 'security' %}warning{% else %}info{% endif %}">
+                        {{ user.get_role_display }}
+                    </span>
+                </p>
+                <p><i class="fas fa-envelope"></i> {{ user.email }}</p>
+                <p><i class="fas fa-phone"></i> {{ user.phone_number|default:"Not provided" }}</p>
+                <p><i class="fas fa-calendar"></i> Joined: {{ user.date_joined|date:"F j, Y" }}</p>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-line"></i> Statistics</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Reports Submitted:</strong> {{ user.reported_incidents.count }}</p>
+                <p><strong>Alerts Received:</strong> {{ user.alertrecipient_set.count }}</p>
+                <p><strong>Emergency Triggers:</strong> {{ user.emergencypanic_set.count }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-edit"></i> Edit Profile</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" name="username" class="form-control" value="{{ user.username }}" readonly>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control" value="{{ user.email }}" readonly>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" name="phone_number" class="form-control" value="{{ user.phone_number }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Address</label>
+                        <textarea name="address" class="form-control" rows="3">{{ user.address }}</textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Emergency Contact Name</label>
+                        <input type="text" name="emergency_contact_name" class="form-control" value="{{ user.emergency_contact_name }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Emergency Contact Phone</label>
+                        <input type="tel" name="emergency_contact_phone" class="form-control" value="{{ user.emergency_contact_phone }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Profile Picture</label>
+                        <input type="file" name="profile_picture" class="form-control" accept="image/*">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Update Profile
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5><i class="fas fa-history"></i> Recent Activity</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    {% for incident in user.reported_incidents.all|slice:":5" %}
+                    <div class="mb-3">
+                        <small class="text-muted">{{ incident.reported_at|timesince }} ago</small>
+                        <p><i class="fas fa-exclamation-triangle"></i> Reported: {{ incident.title }}</p>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">No recent activity</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

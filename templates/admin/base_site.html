@@ -1,0 +1,55 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | Crowd Safety Admin{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="{% static 'css/admin_black_blue.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">
+        <i class="fas fa-shield-alt"></i> Crowd Safety Management System
+    </a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}
+<div class="admin-quick-links">
+    <a href="{% url 'dashboard:index' %}" target="_blank">
+        <i class="fas fa-tachometer-alt"></i> Dashboard
+    </a>
+    <a href="{% url 'monitoring:index' %}" target="_blank">
+        <i class="fas fa-map-marked-alt"></i> Monitoring
+    </a>
+    <a href="{% url 'alerts:index' %}" target="_blank">
+        <i class="fas fa-bell"></i> Alerts
+    </a>
+    <a href="{% url 'incidents:index' %}" target="_blank">
+        <i class="fas fa-exclamation-triangle"></i> Incidents
+    </a>
+    <a href="{% url 'ai:chat_page' %}" target="_blank">
+        <i class="fas fa-robot"></i> AI Assistant
+    </a>
+</div>
+{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+<div class="admin-footer">
+    <div class="footer-content">
+        <div>
+            <i class="fas fa-copyright"></i> 2024 Crowd Safety System
+        </div>
+        <div>
+            <i class="fas fa-shield-alt"></i> Black & Blue Theme
+        </div>
+        <div>
+            <i class="fas fa-chart-line"></i> Version 3.0.0
+        </div>
+    </div>
+</div>
+{% endblock %}

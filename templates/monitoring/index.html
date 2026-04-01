@@ -1,0 +1,846 @@
+{% extends 'base.html' %}
+
+{% block title %}Live Monitoring - Crowd Safety System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .density-indicator {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+    .density-low { background-color: #4cc9f0; }
+    .density-medium { background-color: #f8961e; }
+    .density-high { background-color: #f72585; }
+    
+    .info-panel {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    .location-status {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        background: white;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        font-weight: 500;
+    }
+    
+    .location-found { color: #28a745; }
+    .location-error { color: #dc3545; }
+    
+    .user-marker {
+        background: #4361ee;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 3px solid white;
+        box-shadow: 0 0 0 2px #4361ee;
+        animation: pulseBlue 2s infinite;
+    }
+    
+    @keyframes pulseBlue {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.3); opacity: 0.7; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    
+    .center-button {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        background: white;
+        border: none;
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        cursor: pointer;
+        font-size: 20px;
+        transition: all 0.3s;
+    }
+    
+    .center-button:hover {
+        transform: scale(1.1);
+        background: #4361ee;
+        color: white;
+    }
+    
+    .coords-display {
+        font-family: monospace;
+        font-size: 11px;
+        background: #f8f9fa;
+        padding: 8px;
+        border-radius: 5px;
+        margin-top: 5px;
+    }
+    
+    .gps-status {
+        font-size: 12px;
+        margin-top: 5px;
+    }
+    
+    .gps-active { color: #28a745; }
+    .gps-inactive { color: #dc3545; }
+    
+    .location-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .btn-location {
+        background: rgba(255,255,255,0.2);
+        border: none;
+        color: white;
+        margin-top: 10px;
+    }
+    
+    .btn-location:hover {
+        background: rgba(255,255,255,0.3);
+        color: white;
+    }
+    
+    .safe-route-item {
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        background: #f8f9fa;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+    
+    .safe-route-item:hover {
+        background: #e9ecef;
+        transform: translateX(5px);
+    }
+    
+    .safety-score-high { color: #28a745; }
+    .safety-score-medium { color: #ffc107; }
+    .safety-score-low { color: #dc3545; }
+    
+    .refresh-indicator {
+        font-size: 11px;
+        color: #6c757d;
+        margin-top: 5px;
+        text-align: center;
+    }
+    
+    .legend {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #dee2e6;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+    }
+    
+    @keyframes pulseAlert {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.2); opacity: 0.7; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    .alert-marker {
+        animation: pulseAlert 1.5s infinite;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="sidebar">
+            <div class="location-card">
+                <h5><i class="fas fa-map-marker-alt"></i> Your Location</h5>
+                <div id="locationDisplay">
+                    <i class="fas fa-spinner fa-spin"></i> Getting your precise location...
+                </div>
+                <div id="gpsStatus" class="gps-status mt-2">
+                    <i class="fas fa-satellite-dish"></i> <span id="gpsText">Waiting for GPS...</span>
+                </div>
+                <button class="btn btn-location btn-sm w-100 mt-2" onclick="forceGetLocation()">
+                    <i class="fas fa-sync-alt"></i> Get My Precise Location
+                </button>
+            </div>
+            
+            <div class="info-panel">
+                <h6><i class="fas fa-chart-bar"></i> Crowd Density</h6>
+                <div id="densityStats">
+                    <p><span class="density-indicator density-low"></span> Low: <span id="lowCount">0</span></p>
+                    <p><span class="density-indicator density-medium"></span> Medium: <span id="mediumCount">0</span></p>
+                    <p><span class="density-indicator density-high"></span> High: <span id="highCount">0</span></p>
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div style="width:12px;height:12px;background:#4cc9f0;border-radius:50%;"></div>
+                        <span>Low</span>
+                    </div>
+                    <div class="legend-item">
+                        <div style="width:12px;height:12px;background:#f8961e;border-radius:50%;"></div>
+                        <span>Medium</span>
+                    </div>
+                    <div class="legend-item">
+                        <div style="width:12px;height:12px;background:#f72585;border-radius:50%;"></div>
+                        <span>High</span>
+                    </div>
+                </div>
+                <div class="refresh-indicator">
+                    <i class="fas fa-sync-alt fa-fw"></i> Updates every 10 seconds
+                </div>
+            </div>
+            
+            <div class="info-panel">
+                <h6><i class="fas fa-route"></i> Safe Routes Near You</h6>
+                <div id="safeRoutes">
+                    <p class="text-muted text-center py-3">
+                        <i class="fas fa-spinner fa-spin"></i> Loading safe routes...
+                    </p>
+                </div>
+                <div class="refresh-indicator">
+                    <i class="fas fa-map-marker-alt"></i> Based on your current location
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body p-0 position-relative">
+                <div class="map-container" id="map" style="height: 550px;"></div>
+                <div class="location-status" id="locationStatus">
+                    <i class="fas fa-spinner fa-spin"></i> Loading map...
+                </div>
+                <button class="center-button" onclick="centerOnMyLocation()" title="Center on my location">
+                    <i class="fas fa-location-dot"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    let map;
+    let userMarker = null;
+    let myLocation = null;
+    let heatLayer;
+    let markers = [];
+    let watchId = null;
+    let refreshInterval = null;
+    let routesInterval = null;
+    let alertMarker = null;
+    
+    // Initialize map
+    function initMap() {
+        map = L.map('map').setView([28.6139, 77.2090], 5);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+        
+        // Load crowd data
+        loadCrowdData();
+        loadHeatmapData();
+        
+        // Map click handler
+        map.on('click', function(e) {
+            getSafeRoutesAtLocation(e.latlng.lat, e.latlng.lng);
+        });
+        
+        // Start location tracking
+        startLocationTracking();
+        
+        // Start real-time updates
+        startRealTimeUpdates();
+        
+        // Check for alert location from URL
+        setTimeout(checkForAlertLocation, 1000);
+    }
+    
+    // ============================================
+    // CHECK FOR ALERT LOCATION FROM URL
+    // ============================================
+    function checkForAlertLocation() {
+        var urlParams = new URLSearchParams(window.location.search);
+        var alertLat = urlParams.get('lat');
+        var alertLng = urlParams.get('lng');
+        var alertZoom = urlParams.get('zoom') || 15;
+        var alertLocation = urlParams.get('location') || 'Alert Location';
+        var showAlert = urlParams.get('showAlert') === 'true';
+        
+        console.log("URL Params - lat:", alertLat, "lng:", alertLng);
+        
+        if (alertLat && alertLng && showAlert) {
+            alertLat = parseFloat(alertLat);
+            alertLng = parseFloat(alertLng);
+            
+            if (!isNaN(alertLat) && !isNaN(alertLng)) {
+                console.log("📍 Showing ALERT LOCATION:", alertLocation, "at", alertLat, alertLng);
+                
+                // Center map on ALERT LOCATION (NOT current location)
+                map.setView([alertLat, alertLng], parseInt(alertZoom));
+                
+                // Remove any existing alert marker
+                if (alertMarker) {
+                    map.removeLayer(alertMarker);
+                }
+                
+                // Create custom alert marker (pulsing red)
+                var alertIcon = L.divIcon({
+                    html: '<div style="background: #ef4444; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 3px #ef4444; animation: pulseAlert 1.5s infinite;"></div>',
+                    iconSize: [28, 28],
+                    iconAnchor: [14, 14],
+                    className: 'alert-marker'
+                });
+                
+                // Add alert marker at the ALERT LOCATION
+                alertMarker = L.marker([alertLat, alertLng], {
+                    icon: alertIcon,
+                    zIndexOffset: 2000
+                }).addTo(map);
+                
+                // Add popup with alert information
+                alertMarker.bindPopup(`
+                    <div class="text-center" style="min-width: 220px;">
+                        <div style="color: #ef4444; font-weight: bold; font-size: 16px; margin-bottom: 5px;">
+                            <i class="fas fa-exclamation-triangle"></i> ALERT LOCATION
+                        </div>
+                        <div style="font-weight: bold; margin-bottom: 8px;">📍 ${alertLocation}</div>
+                        <div style="font-size: 12px; color: #666;">
+                            Latitude: ${alertLat.toFixed(6)}<br>
+                            Longitude: ${alertLng.toFixed(6)}
+                        </div>
+                        <button onclick="centerOnAlert()" class="btn btn-sm btn-danger mt-2" style="font-size: 11px;">
+                            <i class="fas fa-crosshairs"></i> Center Here
+                        </button>
+                    </div>
+                `).openPopup();
+                
+                // Store alert location for center function
+                window.alertLocation = { lat: alertLat, lng: alertLng, name: alertLocation };
+                
+                // Show notification
+                showToastMessage('📍 Alert location: ' + alertLocation, 'warning');
+            }
+        }
+    }
+    
+    // Center on alert function
+    function centerOnAlert() {
+        if (window.alertLocation) {
+            map.setView([window.alertLocation.lat, window.alertLocation.lng], 16);
+            if (alertMarker) {
+                alertMarker.openPopup();
+            }
+            showToastMessage('Centered on alert location', 'success');
+        }
+    }
+    
+    // Show toast message
+    function showToastMessage(message, type) {
+        var toastHtml = `
+            <div class="toast show" role="alert" style="min-width: 280px; position: fixed; top: 20px; right: 20px; z-index: 9999;">
+                <div class="toast-header bg-${type === 'success' ? 'success' : (type === 'warning' ? 'warning' : 'danger')} text-white">
+                    <strong class="me-auto">
+                        <i class="fas ${type === 'success' ? 'fa-check-circle' : (type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle')}"></i>
+                        ${type === 'success' ? 'Success' : (type === 'warning' ? 'Alert' : 'Info')}
+                    </strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                </div>
+                <div class="toast-body">${message}</div>
+            </div>
+        `;
+        var container = document.getElementById('notificationArea');
+        if (!container) {
+            var newContainer = document.createElement('div');
+            newContainer.id = 'notificationArea';
+            newContainer.className = 'toast-notification';
+            document.body.appendChild(newContainer);
+            container = newContainer;
+        }
+        container.insertAdjacentHTML('beforeend', toastHtml);
+        setTimeout(function() {
+            var toasts = document.querySelectorAll('.toast');
+            if (toasts.length) toasts[toasts.length - 1].remove();
+        }, 5000);
+    }
+    
+    // Start location tracking with GPS
+    function startLocationTracking() {
+        if (!navigator.geolocation) {
+            $('#gpsText').text('GPS not supported');
+            getLocationFromIP();
+            return;
+        }
+        
+        $('#gpsText').html('<i class="fas fa-spinner fa-spin"></i> Requesting GPS...');
+        $('#locationStatus').html('<i class="fas fa-spinner fa-spin"></i> Getting GPS location...');
+        
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                const accuracy = position.coords.accuracy;
+                
+                console.log("🎯 GPS Location:", lat, lng, "Accuracy:", accuracy, "meters");
+                
+                myLocation = {
+                    lat: lat,
+                    lng: lng,
+                    accuracy: accuracy,
+                    source: 'GPS'
+                };
+                
+                updateMapWithLocation(lat, lng, accuracy);
+                
+                $('#gpsText').html(`<i class="fas fa-check-circle gps-active"></i> GPS Active (Accuracy: ±${Math.round(accuracy)}m)`);
+                $('#locationStatus').html('<i class="fas fa-check-circle location-found"></i> GPS location found!');
+                
+                sendLocationToServer(lat, lng);
+                startWatchingLocation();
+                getSafeRoutesNearMe();
+                
+                setTimeout(() => {
+                    $('#locationStatus').fadeOut();
+                }, 3000);
+            },
+            function(error) {
+                console.log("GPS Error:", error);
+                let errorMsg = "";
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMsg = "Please allow location access";
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMsg = "GPS unavailable - using IP";
+                        break;
+                    case error.TIMEOUT:
+                        errorMsg = "GPS timeout - using IP";
+                        break;
+                    default:
+                        errorMsg = "GPS error - using IP";
+                }
+                
+                $('#gpsText').html(`<i class="fas fa-exclamation-triangle gps-inactive"></i> ${errorMsg}`);
+                getLocationFromIP();
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        );
+    }
+    
+    // Start watching location for movement
+    function startWatchingLocation() {
+        if (watchId) {
+            navigator.geolocation.clearWatch(watchId);
+        }
+        
+        watchId = navigator.geolocation.watchPosition(
+            function(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                const accuracy = position.coords.accuracy;
+                
+                if (myLocation) {
+                    const distance = getDistance(myLocation.lat, myLocation.lng, lat, lng);
+                    if (distance > 10) {
+                        console.log("📍 Moved:", distance, "meters");
+                        myLocation = { lat: lat, lng: lng, accuracy: accuracy, source: 'GPS' };
+                        updateUserMarker(lat, lng, accuracy);
+                        updateLocationDisplay(lat, lng, accuracy);
+                        sendLocationToServer(lat, lng);
+                        getSafeRoutesNearMe();
+                    }
+                }
+            },
+            function(error) {
+                console.log("Watch error:", error);
+            },
+            {
+                enableHighAccuracy: true,
+                maximumAge: 5000,
+                timeout: 10000
+            }
+        );
+    }
+    
+    // Get location from IP (fallback)
+    function getLocationFromIP() {
+        $('#locationStatus').html('<i class="fas fa-spinner fa-spin"></i> Getting IP location...');
+        
+        $.getJSON('/monitoring/api/user-location/', function(response) {
+            if (response.status === 'success') {
+                const loc = response.location;
+                myLocation = {
+                    lat: loc.latitude,
+                    lng: loc.longitude,
+                    accuracy: 1000,
+                    source: 'IP',
+                    city: loc.city
+                };
+                
+                updateMapWithLocation(loc.latitude, loc.longitude, 1000);
+                $('#gpsText').html(`<i class="fas fa-globe"></i> Using IP location (${loc.city || 'Unknown'})`);
+                $('#locationStatus').html('<i class="fas fa-map-marker-alt location-found"></i> Location found via IP');
+                getSafeRoutesNearMe();
+            } else {
+                useDefaultLocation();
+            }
+        }).fail(function() {
+            useDefaultLocation();
+        });
+    }
+    
+    // Use default location
+    function useDefaultLocation() {
+        myLocation = {
+            lat: 28.6139,
+            lng: 77.2090,
+            accuracy: 5000,
+            source: 'Default',
+            city: 'Delhi'
+        };
+        updateMapWithLocation(28.6139, 77.2090, 5000);
+        $('#gpsText').html('<i class="fas fa-map-marker-alt"></i> Using default location');
+        getSafeRoutesNearMe();
+    }
+    
+    // Update map with location
+    function updateMapWithLocation(lat, lng, accuracy) {
+        map.setView([lat, lng], 15);
+        updateUserMarker(lat, lng, accuracy);
+        updateLocationDisplay(lat, lng, accuracy);
+        getAddressFromCoordinates(lat, lng);
+    }
+    
+    // Update user marker
+    function updateUserMarker(lat, lng, accuracy) {
+        if (userMarker) {
+            map.removeLayer(userMarker);
+        }
+        
+        const userIcon = L.divIcon({
+            html: '<div class="user-marker"></div>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+        });
+        
+        userMarker = L.marker([lat, lng], {
+            icon: userIcon,
+            zIndexOffset: 1000
+        }).addTo(map);
+        
+        let sourceText = myLocation.source === 'GPS' ? 'GPS (High Accuracy)' : 
+                        (myLocation.source === 'IP' ? 'IP Location' : 'Default');
+        
+        userMarker.bindPopup(`
+            <div class="text-center">
+                <strong><i class="fas fa-user"></i> You are here</strong><br>
+                <small>Lat: ${lat.toFixed(6)}<br>Lng: ${lng.toFixed(6)}</small><br>
+                <small class="text-muted">Accuracy: ±${Math.round(accuracy)}m</small><br>
+                <small class="text-muted">Source: ${sourceText}</small>
+            </div>
+        `).openPopup();
+        
+        // Add accuracy circle
+        L.circle([lat, lng], {
+            radius: accuracy,
+            color: '#4361ee',
+            fillColor: '#4361ee',
+            fillOpacity: 0.1,
+            weight: 2
+        }).addTo(map);
+    }
+    
+    // Update location display
+    function updateLocationDisplay(lat, lng, accuracy) {
+        let sourceIcon = myLocation.source === 'GPS' ? 'fa-satellite-dish' : 
+                        (myLocation.source === 'IP' ? 'fa-globe' : 'fa-map-marker-alt');
+        
+        $('#locationDisplay').html(`
+            <div>
+                <i class="fas ${sourceIcon}"></i>
+                <strong>${myLocation.source === 'GPS' ? 'GPS Location' : 
+                           (myLocation.source === 'IP' ? 'IP Location' : 'Default Location')}</strong><br>
+                <small>Lat: ${lat.toFixed(6)}<br>Lng: ${lng.toFixed(6)}</small><br>
+                <small class="text-muted">Accuracy: ±${Math.round(accuracy)} meters</small>
+                <div id="addressDisplay" class="mt-2">
+                    <i class="fas fa-spinner fa-spin"></i> Getting address...
+                </div>
+            </div>
+        `);
+    }
+    
+    // Get address from coordinates
+    function getAddressFromCoordinates(lat, lng) {
+        $.getJSON(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18`, function(data) {
+            if (data && data.display_name) {
+                const shortAddress = data.display_name.split(',')[0];
+                $('#addressDisplay').html(`
+                    <i class="fas fa-location-dot"></i> ${shortAddress}
+                `);
+            }
+        }).fail(function() {
+            $('#addressDisplay').html('<i class="fas fa-map-marker-alt"></i> Address lookup failed');
+        });
+    }
+    
+    // Load crowd data
+    function loadCrowdData() {
+        $.getJSON('/monitoring/api/crowd-data/', function(response) {
+            if (response.status === 'success' && response.data) {
+                updateCrowdMarkers(response.data);
+                updateDensityStats(response.data);
+            }
+        }).fail(function() {
+            console.log('Error loading crowd data');
+        });
+    }
+    
+    // Load heatmap data
+    function loadHeatmapData() {
+        $.getJSON('/monitoring/api/heatmap-data/', function(data) {
+            if (heatLayer) {
+                map.removeLayer(heatLayer);
+            }
+            if (data.heatmap_data && data.heatmap_data.length) {
+                heatLayer = L.heatLayer(data.heatmap_data, {
+                    radius: 25,
+                    blur: 15,
+                    gradient: { 0.4: '#4cc9f0', 0.6: '#f8961e', 0.8: '#f72585' }
+                }).addTo(map);
+            }
+        });
+    }
+    
+    // Update crowd markers on map
+    function updateCrowdMarkers(crowdData) {
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
+        
+        let lowCount = 0, mediumCount = 0, highCount = 0;
+        
+        crowdData.forEach(item => {
+            let color = item.density === 'high' ? '#f72585' : 
+                       (item.density === 'medium' ? '#f8961e' : '#4cc9f0');
+            
+            if (item.density === 'low') lowCount++;
+            if (item.density === 'medium') mediumCount++;
+            if (item.density === 'high') highCount++;
+            
+            const marker = L.circleMarker([item.lat, item.lng], {
+                radius: 12,
+                fillColor: color,
+                color: '#fff',
+                weight: 2,
+                fillOpacity: 0.7
+            }).addTo(map);
+            
+            marker.bindPopup(`
+                <strong>${item.location}</strong><br>
+                Density: <span style="color: ${color}">${item.density.toUpperCase()}</span><br>
+                People: <strong>${item.count}</strong><br>
+                <small>Updated: ${item.timestamp || 'Just now'}</small>
+            `);
+            
+            markers.push(marker);
+        });
+        
+        $('#lowCount').text(lowCount);
+        $('#mediumCount').text(mediumCount);
+        $('#highCount').text(highCount);
+    }
+    
+    // Update density statistics
+    function updateDensityStats(crowdData) {
+        let low = 0, medium = 0, high = 0;
+        crowdData.forEach(item => {
+            if (item.density === 'low') low++;
+            if (item.density === 'medium') medium++;
+            if (item.density === 'high') high++;
+        });
+        
+        $('#lowCount').text(low);
+        $('#mediumCount').text(medium);
+        $('#highCount').text(high);
+    }
+    
+    // Get safe routes near current location
+    function getSafeRoutesNearMe() {
+        if (myLocation) {
+            $.getJSON(`/monitoring/api/safe-routes/?lat=${myLocation.lat}&lng=${myLocation.lng}`, function(response) {
+                if (response.safe_routes && response.safe_routes.length > 0) {
+                    displaySafeRoutes(response.safe_routes);
+                } else {
+                    $('#safeRoutes').html('<p class="text-muted text-center py-3">No safe routes found nearby</p>');
+                }
+            }).fail(function() {
+                $('#safeRoutes').html('<p class="text-muted text-center py-3">Error loading safe routes</p>');
+            });
+        }
+    }
+    
+    // Get safe routes at clicked location
+    function getSafeRoutesAtLocation(lat, lng) {
+        $.getJSON(`/monitoring/api/safe-routes/?lat=${lat}&lng=${lng}`, function(response) {
+            if (response.safe_routes && response.safe_routes.length > 0) {
+                displaySafeRoutes(response.safe_routes);
+            } else {
+                $('#safeRoutes').html('<p class="text-muted text-center py-3">No safe routes found near clicked location</p>');
+            }
+        });
+    }
+    
+    // Display safe routes
+    function displaySafeRoutes(routes) {
+        let html = '<div>';
+        routes.forEach(route => {
+            const safetyColor = route.safety_score > 80 ? 'high' : 
+                               (route.safety_score > 60 ? 'medium' : 'low');
+            const scoreClass = safetyColor === 'high' ? 'safety-score-high' : 
+                              (safetyColor === 'medium' ? 'safety-score-medium' : 'safety-score-low');
+            
+            html += `
+                <div class="safe-route-item" onclick="navigateTo(${route.latitude}, ${route.longitude})">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <strong><i class="fas fa-shield-alt"></i> ${route.location}</strong>
+                            <div class="mt-1">
+                                <small class="text-muted">
+                                    <i class="fas fa-users"></i> ${route.people_count} people
+                                    &nbsp;|&nbsp;
+                                    <i class="fas fa-route"></i> ${route.distance} m away
+                                </small>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge ${scoreClass}">${route.safety_score}% Safe</span>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <div class="progress" style="height: 4px;">
+                            <div class="progress-bar bg-${safetyColor === 'high' ? 'success' : (safetyColor === 'medium' ? 'warning' : 'danger')}" 
+                                 style="width: ${route.safety_score}%"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        
+        $('#safeRoutes').html(html);
+    }
+    
+    // Navigate to location
+    function navigateTo(lat, lng) {
+        map.setView([lat, lng], 15);
+        const tempMarker = L.marker([lat, lng]).addTo(map);
+        tempMarker.bindPopup('<strong>Safe Zone</strong><br>Low crowd area').openPopup();
+        setTimeout(() => {
+            map.removeLayer(tempMarker);
+        }, 5000);
+    }
+    
+    // Start real-time updates
+    function startRealTimeUpdates() {
+        if (refreshInterval) clearInterval(refreshInterval);
+        if (routesInterval) clearInterval(routesInterval);
+        
+        refreshInterval = setInterval(function() {
+            loadCrowdData();
+            loadHeatmapData();
+        }, 10000);
+        
+        routesInterval = setInterval(function() {
+            if (myLocation) {
+                getSafeRoutesNearMe();
+            }
+        }, 15000);
+    }
+    
+    // Force get location again
+    function forceGetLocation() {
+        if (watchId) {
+            navigator.geolocation.clearWatch(watchId);
+        }
+        startLocationTracking();
+    }
+    
+    // Center on my location
+    function centerOnMyLocation() {
+        if (myLocation) {
+            map.setView([myLocation.lat, myLocation.lng], 17);
+            if (userMarker) userMarker.openPopup();
+        } else {
+            forceGetLocation();
+        }
+    }
+    
+    // Calculate distance between two points
+    function getDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371e3;
+        const φ1 = lat1 * Math.PI / 180;
+        const φ2 = lat2 * Math.PI / 180;
+        const Δφ = (lat2 - lat1) * Math.PI / 180;
+        const Δλ = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                  Math.cos(φ1) * Math.cos(φ2) *
+                  Math.sin(Δλ/2) * Math.sin(Δλ/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+    
+    // Send location to server
+    function sendLocationToServer(lat, lng) {
+        $.ajax({
+            url: '/monitoring/api/user-location/',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ latitude: lat, longitude: lng }),
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+        });
+        
+        $.post('/accounts/update-location/', {
+            latitude: lat,
+            longitude: lng,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        });
+    }
+    
+    // Initialize on page load
+    $(document).ready(function() {
+        initMap();
+    });
+    
+    // Make functions global
+    window.centerOnMyLocation = centerOnMyLocation;
+    window.forceGetLocation = forceGetLocation;
+    window.navigateTo = navigateTo;
+    window.centerOnAlert = centerOnAlert;
+</script>
+{% endblock %}

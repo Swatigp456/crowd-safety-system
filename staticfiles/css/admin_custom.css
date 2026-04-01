@@ -1,0 +1,707 @@
+/* static/css/admin_beautiful.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ============================================
+   MODERN ADMIN PANEL - CRYSTAL CLEAR DESIGN
+   ============================================ */
+
+:root {
+    /* Primary Colors */
+    --primary: #4361ee;
+    --primary-dark: #3a0ca3;
+    --primary-light: #4895ef;
+    --secondary: #7209b7;
+    --success: #4cc9f0;
+    --danger: #f72585;
+    --warning: #f8961e;
+    --info: #4c9aff;
+    
+    /* Text Colors - HIGH CONTRAST */
+    --text-primary: #1a1a2e;
+    --text-secondary: #2d3748;
+    --text-muted: #4a5568;
+    --text-light: #718096;
+    --text-white: #ffffff;
+    
+    /* Background Colors */
+    --bg-white: #ffffff;
+    --bg-light: #f7fafc;
+    --bg-gray: #edf2f7;
+    --bg-dark: #1a1a2e;
+    
+    /* Border Colors */
+    --border-light: #e2e8f0;
+    --border-medium: #cbd5e0;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+* {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ============================================
+   BODY & BACKGROUND
+   ============================================ */
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+#container {
+    background: var(--bg-light);
+    border-radius: 0;
+    min-height: 100vh;
+}
+
+/* ============================================
+   HEADER - CRYSTAL CLEAR
+   ============================================ */
+#header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: var(--text-white);
+    padding: 1.25rem 2rem;
+    box-shadow: var(--shadow-lg);
+    border-bottom: 3px solid var(--primary);
+}
+
+#branding h1 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+#branding h1 a {
+    color: var(--text-white);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+#branding h1 a:before {
+    content: '🛡️';
+    font-size: 1.75rem;
+}
+
+/* User Tools */
+#user-tools {
+    font-size: 0.9rem;
+    padding: 0.75rem 0;
+    color: var(--text-white);
+}
+
+#user-tools a {
+    color: var(--text-white);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    transition: all 0.3s;
+    font-weight: 500;
+}
+
+#user-tools a:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* ============================================
+   MODULES & CARDS - CLEAR VISIBILITY
+   ============================================ */
+.module {
+    background: var(--bg-white);
+    border-radius: 20px;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border-light);
+}
+
+.module h2, .module caption {
+    background: linear-gradient(135deg, var(--bg-gray), var(--bg-light));
+    color: var(--text-primary);
+    padding: 1rem 1.5rem;
+    font-weight: 700;
+    font-size: 1rem;
+    border-bottom: 2px solid var(--primary);
+    margin: 0;
+}
+
+.module h2 a, .module caption a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.module p, .module ul, .module li {
+    color: var(--text-secondary);
+}
+
+/* ============================================
+   TABLES - HIGH CONTRAST
+   ============================================ */
+#changelist table {
+    border-radius: 16px;
+    overflow: hidden;
+    width: 100%;
+    background: var(--bg-white);
+}
+
+#changelist table thead th {
+    background: linear-gradient(135deg, var(--bg-gray), var(--bg-light));
+    color: var(--text-primary);
+    font-weight: 700;
+    padding: 1rem;
+    border: none;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+#changelist table tbody tr {
+    transition: all 0.2s;
+    border-bottom: 1px solid var(--border-light);
+}
+
+#changelist table tbody tr:hover {
+    background: var(--bg-light);
+    transform: scale(1.01);
+    box-shadow: var(--shadow-sm);
+}
+
+#changelist table tbody td {
+    padding: 1rem;
+    color: var(--text-secondary);
+    vertical-align: middle;
+}
+
+/* Row colors for better visibility */
+.row1 {
+    background: var(--bg-white);
+}
+
+.row2 {
+    background: var(--bg-light);
+}
+
+/* ============================================
+   BUTTONS - BOLD & CLEAR
+   ============================================ */
+.button, input[type="submit"], input[type="button"], 
+.submit-row input, a.button {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: var(--text-white);
+    border: none;
+    padding: 0.6rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.875rem;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.button:hover, input[type="submit"]:hover, 
+input[type="button"]:hover, .submit-row input:hover, 
+a.button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    background: linear-gradient(135deg, var(--primary-dark), var(--secondary));
+}
+
+.button.default, input[type="submit"].default, 
+.submit-row input.default {
+    background: linear-gradient(135deg, var(--success), #3b82f6);
+    color: var(--text-white);
+}
+
+.button.default:hover, input[type="submit"].default:hover, 
+.submit-row input.default:hover {
+    background: linear-gradient(135deg, #3b82f6, var(--primary));
+}
+
+/* Danger Button */
+.deletelink, .deletelink-box a {
+    background: linear-gradient(135deg, var(--danger), #dc2626);
+    color: var(--text-white);
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.deletelink:hover, .deletelink-box a:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    background: linear-gradient(135deg, #dc2626, var(--danger));
+    color: var(--text-white);
+}
+
+/* ============================================
+   SIDEBAR FILTER - CLEAR READABILITY
+   ============================================ */
+#changelist-filter {
+    background: var(--bg-white);
+    border-radius: 20px;
+    box-shadow: var(--shadow-md);
+    padding: 1.25rem;
+    border: 1px solid var(--border-light);
+}
+
+#changelist-filter h2 {
+    background: linear-gradient(135deg, var(--bg-gray), var(--bg-light));
+    padding: 0.75rem;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--primary);
+}
+
+#changelist-filter a {
+    color: var(--text-secondary);
+    transition: all 0.3s;
+    padding: 0.5rem 0;
+    display: inline-block;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+#changelist-filter a:hover {
+    color: var(--primary);
+    padding-left: 0.5rem;
+}
+
+#changelist-filter li.selected a {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+/* ============================================
+   FORMS - CLEAR INPUTS
+   ============================================ */
+.form-row {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.form-row label {
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.aligned .form-row input, 
+.aligned .form-row select, 
+.aligned .form-row textarea {
+    border: 2px solid var(--border-light);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s;
+    background: var(--bg-white);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    width: 100%;
+}
+
+.aligned .form-row input:focus, 
+.aligned .form-row select:focus, 
+.aligned .form-row textarea:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+}
+
+/* Help Text */
+.help, .help-text {
+    color: var(--text-light);
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
+
+/* Error Messages */
+.errorlist {
+    color: var(--danger);
+    list-style: none;
+    padding: 0;
+    margin: 0.25rem 0 0 0;
+    font-weight: 500;
+}
+
+/* ============================================
+   PAGINATION - BOLD & CLEAR
+   ============================================ */
+.paginator {
+    background: var(--bg-white);
+    border-radius: 16px;
+    padding: 1rem;
+    margin-top: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
+    color: var(--text-secondary);
+}
+
+.paginator a {
+    background: var(--bg-light);
+    color: var(--primary);
+    border-radius: 10px;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s;
+    margin: 0 0.25rem;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.paginator a:hover {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: var(--text-white);
+    transform: translateY(-2px);
+}
+
+.paginator .this-page {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: var(--text-white);
+    border-radius: 10px;
+    padding: 0.5rem 1rem;
+    font-weight: 700;
+}
+
+/* ============================================
+   MESSAGES - CRYSTAL CLEAR
+   ============================================ */
+.messagelist li {
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+    border: none;
+    font-weight: 500;
+    box-shadow: var(--shadow-sm);
+}
+
+.messagelist li.success {
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    color: #065f46;
+    border-left: 4px solid var(--success);
+}
+
+.messagelist li.error {
+    background: linear-gradient(135deg, #fee2e2, #fecaca);
+    color: #991b1b;
+    border-left: 4px solid var(--danger);
+}
+
+.messagelist li.warning {
+    background: linear-gradient(135deg, #fed7aa, #fde68a);
+    color: #92400e;
+    border-left: 4px solid var(--warning);
+}
+
+.messagelist li.info {
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    color: #1e40af;
+    border-left: 4px solid var(--info);
+}
+
+/* ============================================
+   DASHBOARD STATS CARDS
+   ============================================ */
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--bg-white);
+    padding: 1.5rem;
+    border-radius: 20px;
+    text-align: center;
+    transition: all 0.3s;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-light);
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-xl);
+}
+
+.stat-card i {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.stat-card h3 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0.5rem 0;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-card p {
+    color: var(--text-muted);
+    margin: 0;
+    font-weight: 500;
+}
+
+/* ============================================
+   QUICK LINKS
+   ============================================ */
+.admin-quick-links {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 0.75rem 1.25rem;
+    border-radius: 16px;
+    margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.admin-quick-links a {
+    color: var(--text-white);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    transition: all 0.3s;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.admin-quick-links a:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.admin-footer {
+    background: var(--bg-dark);
+    color: var(--text-white);
+    padding: 1.5rem;
+    text-align: center;
+    margin-top: 2rem;
+    border-radius: 20px 20px 0 0;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    color: var(--text-white);
+}
+
+/* ============================================
+   INLINE GROUPS
+   ============================================ */
+.inline-group {
+    background: var(--bg-white);
+    border-radius: 20px;
+    padding: 1.25rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-light);
+}
+
+.tabular.inline-related {
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.tabular.inline-related thead th {
+    background: linear-gradient(135deg, var(--bg-gray), var(--bg-light));
+    color: var(--text-primary);
+    font-weight: 700;
+    padding: 0.75rem;
+}
+
+/* ============================================
+   FIELD SETS
+   ============================================ */
+fieldset.module {
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid var(--border-light);
+}
+
+fieldset.module .field-row {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-light);
+}
+
+/* ============================================
+   SUBMIT ROW
+   ============================================ */
+.submit-row {
+    background: var(--bg-light);
+    border-radius: 16px;
+    padding: 1rem;
+    margin-top: 1.5rem;
+    border: 1px solid var(--border-light);
+}
+
+.submit-row input {
+    margin-right: 0.75rem;
+}
+
+/* ============================================
+   READONLY FIELDS
+   ============================================ */
+.readonly {
+    background: var(--bg-light);
+    padding: 0.6rem 1rem;
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-weight: 500;
+    display: inline-block;
+}
+
+/* ============================================
+   SCROLLBAR - BEAUTIFUL
+   ============================================ */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-light);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, var(--primary-dark), var(--secondary));
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 768px) {
+    #header {
+        padding: 1rem;
+    }
+    
+    #branding h1 {
+        font-size: 1.25rem;
+    }
+    
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .footer-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .admin-quick-links {
+        flex-direction: column;
+    }
+    
+    .module h2 {
+        font-size: 0.9rem;
+    }
+    
+    #changelist table thead th,
+    #changelist table tbody td {
+        padding: 0.75rem;
+    }
+}
+
+/* ============================================
+   LOGIN PAGE - BEAUTIFUL
+   ============================================ */
+.login {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.login #container {
+    background: transparent;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login .login-logo {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.login .login-logo h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff, #e0e7ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.login .form-row {
+    margin-bottom: 1.5rem;
+}
+
+.login input[type="text"],
+.login input[type="password"] {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.login input[type="text"]:focus,
+.login input[type="password"]:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    background: var(--bg-white);
+}
+
+.login .submit-row {
+    text-align: center;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.login input[type="submit"] {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: var(--text-white);
+    width: 100%;
+    padding: 0.875rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 12px;
+}
+
+.login input[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}

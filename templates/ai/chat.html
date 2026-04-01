@@ -1,0 +1,350 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}AI Safety Assistant - Crowd Safety System{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Chat Container */
+    .chat-container {
+        height: 500px;
+        overflow-y: auto;
+        background: #f8fafc;
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* Message Bubbles */
+    .message {
+        margin-bottom: 1rem;
+        display: flex;
+        animation: fadeIn 0.3s ease-out;
+    }
+    
+    .user-message {
+        justify-content: flex-end;
+    }
+    
+    .ai-message {
+        justify-content: flex-start;
+    }
+    
+    .message-bubble {
+        max-width: 70%;
+        padding: 0.75rem 1rem;
+        border-radius: 18px;
+        word-wrap: break-word;
+    }
+    
+    .user-message .message-bubble {
+        background: linear-gradient(135deg, #2563eb, #7c3aed);
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+    
+    .ai-message .message-bubble {
+        background: white;
+        color: #1e293b;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    /* Message Time */
+    .message-time {
+        font-size: 0.7rem;
+        margin-top: 0.25rem;
+        opacity: 0.7;
+    }
+    
+    /* Input Area */
+    .chat-input-area {
+        background: white;
+        border-radius: 50px;
+        padding: 0.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .chat-input {
+        border: none;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        outline: none;
+        background: transparent;
+    }
+    
+    .chat-input:focus {
+        box-shadow: none;
+    }
+    
+    .send-btn {
+        background: linear-gradient(135deg, #2563eb, #7c3aed);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        padding: 0.5rem 1.5rem;
+        transition: all 0.3s;
+    }
+    
+    .send-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+    }
+    
+    /* Loading Animation */
+    .loading-dots {
+        display: inline-flex;
+        gap: 4px;
+    }
+    
+    .loading-dots span {
+        width: 8px;
+        height: 8px;
+        background: #2563eb;
+        border-radius: 50%;
+        animation: bounce 1.4s infinite ease-in-out both;
+    }
+    
+    .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+    
+    @keyframes bounce {
+        0%, 80%, 100% { transform: scale(0); }
+        40% { transform: scale(1); }
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Welcome Card */
+    .welcome-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        color: white;
+        text-align: center;
+    }
+    
+    .suggestion-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        justify-content: center;
+    }
+    
+    .suggestion-btn {
+        background: rgba(255,255,255,0.2);
+        border: none;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        transition: all 0.3s;
+    }
+    
+    .suggestion-btn:hover {
+        background: rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Welcome Card -->
+            <div class="welcome-card">
+                <i class="fas fa-robot fa-3x mb-3"></i>
+                <h2>AI Safety Assistant</h2>
+                <p>Ask me anything about crowd safety, emergencies, or get advice!</p>
+                <div class="suggestion-buttons">
+                    <button class="suggestion-btn" onclick="askQuestion('How to stay safe in a crowd?')">
+                        🤝 How to stay safe in a crowd?
+                    </button>
+                    <button class="suggestion-btn" onclick="askQuestion('What to do during an emergency?')">
+                        🚨 Emergency procedures?
+                    </button>
+                    <button class="suggestion-btn" onclick="askQuestion('How to avoid crowded areas?')">
+                        🗺️ Avoid crowded areas?
+                    </button>
+                    <button class="suggestion-btn" onclick="askQuestion('What are the best safety tips?')">
+                        💡 Safety tips?
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Chat Container -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white border-0 pt-4">
+                    <h5 class="mb-0">
+                        <i class="fas fa-comments text-primary me-2"></i>
+                        Chat with AI Assistant
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chat-container" id="chatContainer">
+                        <div class="message ai-message">
+                            <div class="message-bubble">
+                                <i class="fas fa-robot me-2"></i>
+                                Hello! I'm your AI safety assistant. I can help you with:
+                                <ul class="mt-2 mb-0">
+                                    <li>Crowd safety tips</li>
+                                    <li>Emergency procedures</li>
+                                    <li>Safe route suggestions</li>
+                                    <li>General safety advice</li>
+                                </ul>
+                                <div class="message-time">
+                                    <i class="far fa-clock"></i> Just now
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input-area mt-3">
+                        <div class="input-group">
+                            <input type="text" 
+                                   class="form-control chat-input" 
+                                   id="userInput" 
+                                   placeholder="Type your question here..."
+                                   onkeypress="handleKeyPress(event)">
+                            <button class="btn send-btn" onclick="sendMessage()">
+                                <i class="fas fa-paper-plane"></i> Send
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Get CSRF token
+    function getCSRFToken() {
+        return document.querySelector('[name=csrf-token]')?.content || 
+               document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)')?.pop();
+    }
+    
+    // Send message to AI
+    async function sendMessage() {
+        const input = document.getElementById('userInput');
+        const message = input.value.trim();
+        
+        if (!message) return;
+        
+        // Add user message to chat
+        addMessage(message, 'user');
+        
+        // Clear input
+        input.value = '';
+        
+        // Show typing indicator
+        showTypingIndicator();
+        
+        try {
+            // Send to AI
+            const response = await fetch('/ai/api/chat/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify({ message: message })
+            });
+            
+            const data = await response.json();
+            
+            // Remove typing indicator
+            removeTypingIndicator();
+            
+            if (data.status === 'success') {
+                addMessage(data.message, 'ai');
+            } else {
+                addMessage("Sorry, I couldn't process your request. Please try again.", 'ai');
+            }
+        } catch (error) {
+            removeTypingIndicator();
+            addMessage("Sorry, there was an error connecting to the AI service. Please check your connection.", 'ai');
+        }
+        
+        // Scroll to bottom
+        scrollToBottom();
+    }
+    
+    function addMessage(text, sender) {
+        const container = document.getElementById('chatContainer');
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}-message`;
+        
+        const icon = sender === 'user' ? 
+            '<i class="fas fa-user-circle me-2"></i>' : 
+            '<i class="fas fa-robot me-2"></i>';
+        
+        messageDiv.innerHTML = `
+            <div class="message-bubble">
+                ${icon}
+                ${text.replace(/\n/g, '<br>')}
+                <div class="message-time">
+                    <i class="far fa-clock"></i> ${time}
+                </div>
+            </div>
+        `;
+        
+        container.appendChild(messageDiv);
+        scrollToBottom();
+    }
+    
+    function showTypingIndicator() {
+        const container = document.getElementById('chatContainer');
+        const typingDiv = document.createElement('div');
+        typingDiv.id = 'typingIndicator';
+        typingDiv.className = 'message ai-message';
+        typingDiv.innerHTML = `
+            <div class="message-bubble">
+                <i class="fas fa-robot me-2"></i>
+                <div class="loading-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        `;
+        container.appendChild(typingDiv);
+        scrollToBottom();
+    }
+    
+    function removeTypingIndicator() {
+        const indicator = document.getElementById('typingIndicator');
+        if (indicator) indicator.remove();
+    }
+    
+    function scrollToBottom() {
+        const container = document.getElementById('chatContainer');
+        container.scrollTop = container.scrollHeight;
+    }
+    
+    function handleKeyPress(event) {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
+    }
+    
+    function askQuestion(question) {
+        document.getElementById('userInput').value = question;
+        sendMessage();
+    }
+</script>
+{% endblock %}

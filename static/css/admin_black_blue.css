@@ -1,0 +1,626 @@
+/* static/css/admin_black_blue.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ============================================
+   BLACK & BLUE ADMIN THEME
+   Modern, Professional, High Contrast
+   ============================================ */
+
+:root {
+    /* Black & Blue Color Scheme */
+    --bg-dark: #0a0a0a;
+    --bg-darker: #050505;
+    --bg-card: #111111;
+    --bg-hover: #1a1a1a;
+    --bg-sidebar: #0f0f0f;
+    
+    /* Blue Accents */
+    --blue-primary: #3b82f6;
+    --blue-dark: #2563eb;
+    --blue-light: #60a5fa;
+    --blue-glow: rgba(59, 130, 246, 0.3);
+    
+    /* Text Colors - HIGH CONTRAST */
+    --text-white: #ffffff;
+    --text-light: #f3f4f6;
+    --text-gray: #d1d5db;
+    --text-muted: #9ca3af;
+    
+    /* Status Colors */
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+    
+    /* Borders */
+    --border: #2a2a2a;
+    --border-light: #333333;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    --shadow-blue: 0 0 15px rgba(59, 130, 246, 0.3);
+}
+
+* {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ============================================
+   BODY - Dark Background
+   ============================================ */
+body {
+    background: var(--bg-dark);
+    color: var(--text-white);
+    font-size: 14px;
+}
+
+#container {
+    background: transparent;
+    padding: 20px;
+}
+
+/* ============================================
+   HEADER - Dark with Blue Accent
+   ============================================ */
+#header {
+    background: linear-gradient(135deg, var(--bg-darker) 0%, #0a0a0a 100%);
+    color: var(--text-white);
+    padding: 20px 30px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--blue-primary);
+    box-shadow: var(--shadow-md);
+}
+
+#branding h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+#branding h1 a {
+    color: var(--text-white);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#branding h1 a::before {
+    content: '🛡️';
+    font-size: 1.5rem;
+}
+
+/* User Tools */
+#user-tools {
+    font-size: 0.85rem;
+    margin-top: 10px;
+    color: var(--text-gray);
+}
+
+#user-tools a {
+    color: var(--blue-light);
+    text-decoration: none;
+    padding: 5px 12px;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 8px;
+    margin: 0 2px;
+    transition: all 0.3s;
+}
+
+#user-tools a:hover {
+    background: var(--blue-primary);
+    color: var(--text-white);
+    transform: translateY(-1px);
+}
+
+/* ============================================
+   MODULES & CARDS
+   ============================================ */
+.module {
+    background: var(--bg-card);
+    border-radius: 16px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s;
+}
+
+.module:hover {
+    border-color: var(--blue-primary);
+    box-shadow: var(--shadow-blue);
+}
+
+.module h2, .module caption {
+    background: var(--bg-hover);
+    color: var(--text-white);
+    padding: 12px 20px;
+    font-weight: 600;
+    font-size: 1rem;
+    margin: 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.module h2 a, .module caption a {
+    color: var(--blue-light);
+    text-decoration: none;
+}
+
+.module p, .module ul, .module li {
+    color: var(--text-gray);
+}
+
+/* ============================================
+   TABLES - Clear White Text
+   ============================================ */
+#changelist table {
+    width: 100%;
+    background: var(--bg-card);
+    border-collapse: collapse;
+}
+
+#changelist table thead th {
+    background: var(--bg-hover);
+    color: var(--text-white);
+    font-weight: 600;
+    padding: 12px;
+    border-bottom: 2px solid var(--blue-primary);
+    text-align: left;
+}
+
+#changelist table tbody tr {
+    border-bottom: 1px solid var(--border);
+}
+
+#changelist table tbody tr:hover {
+    background: var(--bg-hover);
+}
+
+#changelist table tbody td {
+    padding: 10px 12px;
+    color: var(--text-light);
+}
+
+#changelist table tbody td a {
+    color: var(--blue-light);
+    text-decoration: none;
+}
+
+#changelist table tbody td a:hover {
+    color: var(--blue-primary);
+    text-decoration: underline;
+}
+
+/* Alternating rows */
+.row1 {
+    background: var(--bg-card);
+}
+
+.row2 {
+    background: var(--bg-hover);
+}
+
+/* ============================================
+   BUTTONS - Blue with White Text
+   ============================================ */
+.button, input[type="submit"], input[type="button"], 
+.submit-row input, a.button {
+    background: var(--blue-primary);
+    color: var(--text-white);
+    border: none;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.3s;
+}
+
+.button:hover, input[type="submit"]:hover, 
+input[type="button"]:hover, .submit-row input:hover, 
+a.button:hover {
+    background: var(--blue-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-blue);
+}
+
+.button.default, input[type="submit"].default {
+    background: var(--success);
+    color: var(--text-white);
+}
+
+.button.default:hover, input[type="submit"].default:hover {
+    background: #059669;
+}
+
+/* Danger buttons */
+.deletelink, .deletelink-box a {
+    background: var(--danger);
+    color: var(--text-white);
+    padding: 5px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+.deletelink:hover, .deletelink-box a:hover {
+    background: #dc2626;
+    color: var(--text-white);
+}
+
+/* ============================================
+   SIDEBAR FILTER
+   ============================================ */
+#changelist-filter {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 15px;
+    border: 1px solid var(--border);
+}
+
+#changelist-filter h2 {
+    background: var(--bg-hover);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--text-white);
+}
+
+#changelist-filter a {
+    color: var(--text-gray);
+    text-decoration: none;
+    display: block;
+    padding: 5px 0;
+}
+
+#changelist-filter a:hover {
+    color: var(--blue-light);
+}
+
+#changelist-filter li.selected a {
+    color: var(--blue-primary);
+    font-weight: 600;
+}
+
+/* ============================================
+   FORMS - Clear Text
+   ============================================ */
+.form-row {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.form-row label {
+    font-weight: 600;
+    color: var(--text-white);
+    margin-bottom: 5px;
+    display: block;
+}
+
+.aligned .form-row input, 
+.aligned .form-row select, 
+.aligned .form-row textarea {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    background: var(--bg-hover);
+    color: var(--text-white);
+    width: 100%;
+}
+
+.aligned .form-row input:focus, 
+.aligned .form-row select:focus, 
+.aligned .form-row textarea:focus {
+    border-color: var(--blue-primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Help text */
+.help, .help-text {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    margin-top: 4px;
+}
+
+/* Error messages */
+.errorlist {
+    color: var(--danger);
+    list-style: none;
+    padding: 0;
+    margin: 5px 0 0 0;
+}
+
+/* Readonly fields */
+.readonly {
+    background: var(--bg-hover);
+    padding: 8px 12px;
+    border-radius: 6px;
+    color: var(--text-light);
+    display: inline-block;
+}
+
+/* ============================================
+   PAGINATION
+   ============================================ */
+.paginator {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 12px;
+    margin-top: 20px;
+    border: 1px solid var(--border);
+    text-align: center;
+}
+
+.paginator a {
+    background: var(--bg-hover);
+    color: var(--text-light);
+    padding: 5px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    margin: 0 2px;
+}
+
+.paginator a:hover {
+    background: var(--blue-primary);
+    color: var(--text-white);
+}
+
+.paginator .this-page {
+    background: var(--blue-primary);
+    color: var(--text-white);
+    padding: 5px 12px;
+    border-radius: 6px;
+}
+
+/* ============================================
+   MESSAGES - Clear Text
+   ============================================ */
+.messagelist li {
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    list-style: none;
+}
+
+.messagelist li.success {
+    background: rgba(16, 185, 129, 0.2);
+    color: #6ee7b7;
+    border-left: 4px solid var(--success);
+}
+
+.messagelist li.error {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fecaca;
+    border-left: 4px solid var(--danger);
+}
+
+.messagelist li.warning {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fed7aa;
+    border-left: 4px solid var(--warning);
+}
+
+.messagelist li.info {
+    background: rgba(59, 130, 246, 0.2);
+    color: #bfdbfe;
+    border-left: 4px solid var(--info);
+}
+
+/* ============================================
+   DASHBOARD STATS CARDS
+   ============================================ */
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: var(--bg-card);
+    padding: 20px;
+    border-radius: 16px;
+    text-align: center;
+    border: 1px solid var(--border);
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--blue-primary);
+    box-shadow: var(--shadow-blue);
+}
+
+.stat-card i {
+    font-size: 2rem;
+    color: var(--blue-primary);
+    margin-bottom: 10px;
+}
+
+.stat-card h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 10px 0;
+    color: var(--text-white);
+}
+
+.stat-card p {
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* ============================================
+   QUICK LINKS
+   ============================================ */
+.admin-quick-links {
+    background: rgba(59, 130, 246, 0.1);
+    padding: 10px 15px;
+    border-radius: 12px;
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.admin-quick-links a {
+    color: var(--blue-light);
+    text-decoration: none;
+    padding: 5px 12px;
+    border-radius: 8px;
+    background: rgba(59, 130, 246, 0.1);
+    font-size: 0.85rem;
+    transition: all 0.3s;
+}
+
+.admin-quick-links a:hover {
+    background: var(--blue-primary);
+    color: var(--text-white);
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.admin-footer {
+    background: var(--bg-darker);
+    color: var(--text-muted);
+    padding: 15px;
+    text-align: center;
+    margin-top: 30px;
+    border-radius: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* ============================================
+   LOGIN PAGE
+   ============================================ */
+.login {
+    background: linear-gradient(135deg, #0a0a0a 0%, #050505 100%);
+}
+
+.login #container {
+    background: var(--bg-card);
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 400px;
+    margin: 0 auto;
+    border: 1px solid var(--border);
+}
+
+.login .login-logo h1 {
+    font-size: 1.5rem;
+    color: var(--text-white);
+    text-align: center;
+}
+
+.login .form-row {
+    margin-bottom: 15px;
+}
+
+.login input[type="text"],
+.login input[type="password"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-hover);
+    color: var(--text-white);
+    font-size: 0.9rem;
+}
+
+.login input[type="text"]:focus,
+.login input[type="password"]:focus {
+    border-color: var(--blue-primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.login input[type="submit"] {
+    width: 100%;
+    background: var(--blue-primary);
+    color: var(--text-white);
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+}
+
+.login input[type="submit"]:hover {
+    background: var(--blue-dark);
+}
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-hover);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--blue-primary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--blue-dark);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    #header { padding: 15px; }
+    #branding h1 { font-size: 1.2rem; }
+    .dashboard-stats { grid-template-columns: 1fr; }
+    .footer-content { flex-direction: column; text-align: center; }
+    #changelist table thead th, #changelist table tbody td { padding: 8px; }
+}
+
+/* ============================================
+   ADDITIONAL STYLES FOR CLARITY
+   ============================================ */
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.badge-success {
+    background: rgba(16, 185, 129, 0.2);
+    color: #6ee7b7;
+}
+
+.badge-danger {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fecaca;
+}
+
+.badge-warning {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fed7aa;
+}
+
+.badge-info {
+    background: rgba(59, 130, 246, 0.2);
+    color: #bfdbfe;
+}

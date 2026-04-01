@@ -1,0 +1,458 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Alerts Center - Crowd Safety System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .alert-card {
+        transition: all 0.3s;
+        border-left: 4px solid transparent;
+    }
+    .alert-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .alert-emergency { border-left-color: #ef4444; background: linear-gradient(90deg, rgba(239,68,68,0.05), white); }
+    .alert-high { border-left-color: #f59e0b; }
+    .alert-medium { border-left-color: #3b82f6; }
+    .alert-low { border-left-color: #10b981; }
+    
+    .global-alerts-section {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        color: white;
+    }
+    .global-alerts-section .card-header {
+        background: rgba(255,255,255,0.1);
+        border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+    .global-alert-item {
+        background: rgba(255,255,255,0.05);
+        border-radius: 12px;
+        margin-bottom: 12px;
+        transition: all 0.3s;
+    }
+    .global-alert-item:hover {
+        background: rgba(255,255,255,0.1);
+        transform: translateX(5px);
+    }
+    .priority-emergency { border-left: 4px solid #ef4444; }
+    .priority-high { border-left: 4px solid #f59e0b; }
+    .priority-medium { border-left: 4px solid #3b82f6; }
+    .priority-low { border-left: 4px solid #10b981; }
+    .refresh-btn { transition: all 0.3s; }
+    .refresh-btn:hover { transform: rotate(180deg); }
+    .view-on-map-btn {
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+    .view-on-map-btn:hover {
+        background: #059669;
+        transform: translateX(3px);
+    }
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    .location-coords {
+        font-family: monospace;
+        font-size: 10px;
+        color: #6c757d;
+        margin-top: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <!-- Global Real-Time Alerts Section -->
+        <div class="card mb-4 global-alerts-section">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-globe"></i> Real-Time Global Alerts</h5>
+                <button class="btn btn-sm btn-outline-light refresh-btn" onclick="refreshGlobalAlerts()"><i class="fas fa-sync-alt"></i> Refresh</button>
+            </div>
+            <div class="card-body">
+                <div id="globalAlertsLoader" class="text-center py-5" style="display: none;">
+                    <div class="spinner-border text-light"></div>
+                    <p class="mt-3 text-light">Fetching latest global alerts...</p>
+                </div>
+                <div id="globalAlertsContent">
+                    <div class="text-center py-5">
+                        <i class="fas fa-spinner fa-spin fa-2x text-light"></i>
+                        <p class="mt-3 text-light">Loading global alerts...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Local Alerts Section -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-bell"></i> Local Alerts</h5>
+                {% if user.role == 'admin' or user.role == 'security' %}
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sendAlertModal"><i class="fas fa-paper-plane"></i> Send Alert</button>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div id="alertsList">
+                    {% if alerts %}
+                        {% for alert in alerts %}
+                        <div class="alert-card alert-{{ alert.priority }} mb-3 p-3 border rounded" 
+                             data-lat="{{ alert.latitude }}"
+                             data-lng="{{ alert.longitude }}"
+                             data-location="{{ alert.location }}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">
+                                        {% if alert.priority == 'emergency' %}
+                                            <i class="fas fa-skull-crosswalk text-danger"></i>
+                                        {% elif alert.priority == 'high' %}
+                                            <i class="fas fa-exclamation-triangle text-warning"></i>
+                                        {% else %}
+                                            <i class="fas fa-info-circle text-info"></i>
+                                        {% endif %}
+                                        {{ alert.title }}
+                                        <span class="badge bg-{% if alert.priority == 'emergency' %}danger{% elif alert.priority == 'high' %}warning{% else %}info{% endif %} ms-2">
+                                            {{ alert.get_priority_display }}
+                                        </span>
+                                    </h6>
+                                    <p class="mb-1">{{ alert.message|truncatechars:200 }}</p>
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-user"></i> {{ alert.created_by.username|default:"System" }} 
+                                            &nbsp;|&nbsp; 
+                                            <i class="fas fa-clock"></i> {{ alert.created_at|timesince }} ago
+                                            {% if alert.location %}
+                                            &nbsp;|&nbsp; 
+                                            <i class="fas fa-map-marker-alt"></i> {{ alert.location }}
+                                            {% endif %}
+                                        </small>
+                                        {% if alert.latitude and alert.longitude %}
+                                        <div class="location-coords">
+                                            <i class="fas fa-location-dot"></i> Coordinates: {{ alert.latitude|floatformat:4 }}, {{ alert.longitude|floatformat:4 }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="ms-3">
+                                    <button class="btn btn-sm btn-outline-primary mark-read mb-2" data-alert-id="{{ alert.id }}">
+                                        <i class="fas fa-check"></i> Mark Read
+                                    </button>
+                                    {% if alert.latitude and alert.longitude %}
+                                    <br>
+                                    <button class="btn btn-sm view-on-map-btn" onclick="viewOnMap({{ alert.latitude }}, {{ alert.longitude }}, '{{ alert.location|escapejs }}')">
+                                        <i class="fas fa-map-marker-alt"></i> View on Map
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-bell-slash fa-3x text-muted"></i>
+                        <p class="text-muted mt-3">No alerts to display</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Send Alert Modal -->
+{% if user.role == 'admin' or user.role == 'security' %}
+<div class="modal fade" id="sendAlertModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-paper-plane"></i> Send New Alert</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="sendAlertForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Alert Title *</label>
+                        <input type="text" class="form-control" id="alertTitle" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Alert Message *</label>
+                        <textarea class="form-control" id="alertMessage" rows="3" required></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Alert Type</label>
+                                <select class="form-select" id="alertType">
+                                    <option value="crowd">Crowd Alert</option>
+                                    <option value="emergency">Emergency</option>
+                                    <option value="security">Security Alert</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Priority</label>
+                                <select class="form-select" id="alertPriority">
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                    <option value="emergency">Emergency</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Location</label>
+                        <input type="text" class="form-control" id="alertLocation">
+                        <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="getCurrentLocation()">
+                            <i class="fas fa-location-dot"></i> Use My Location
+                        </button>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Latitude</label>
+                                <input type="text" class="form-control" id="alertLatitude" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Longitude</label>
+                                <input type="text" class="form-control" id="alertLongitude" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="sendToAll" checked>
+                        <label class="form-check-label">Send to all users</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="submitAlert">Send Alert</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+// ============================================
+// VIEW ON MAP FUNCTION - ONLY FOR LOCAL ALERTS
+// ============================================
+function viewOnMap(lat, lng, locationName) {
+    if (lat && lng) {
+        var alertLat = parseFloat(lat);
+        var alertLng = parseFloat(lng);
+        
+        if (!isNaN(alertLat) && !isNaN(alertLng)) {
+            var mapUrl = '/monitoring/?lat=' + alertLat + '&lng=' + alertLng + '&zoom=15&location=' + encodeURIComponent(locationName || 'Alert Location') + '&showAlert=true';
+            window.open(mapUrl, '_blank');
+            showToast('📍 Opening map at ' + (locationName || 'alert location'), 'success');
+        } else {
+            showToast('Invalid coordinates', 'error');
+        }
+    } else {
+        showToast('No location coordinates available for this alert', 'warning');
+    }
+}
+
+// ============================================
+// GET CURRENT LOCATION
+// ============================================
+function getCurrentLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            document.getElementById('alertLatitude').value = position.coords.latitude;
+            document.getElementById('alertLongitude').value = position.coords.longitude;
+            
+            fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + position.coords.latitude + '&lon=' + position.coords.longitude)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.display_name) {
+                        document.getElementById('alertLocation').value = data.display_name;
+                    }
+                });
+            showToast('Location captured!', 'success');
+        }, function() {
+            showToast('Unable to get location. Please enable location services.', 'error');
+        });
+    } else {
+        showToast('Geolocation not supported', 'error');
+    }
+}
+
+// ============================================
+// LOAD GLOBAL ALERTS - NO VIEW ON MAP BUTTON
+// ============================================
+function loadGlobalAlerts() {
+    document.getElementById('globalAlertsLoader').style.display = 'block';
+    document.getElementById('globalAlertsContent').style.display = 'none';
+    
+    fetch('/alerts/global/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success' && data.alerts && data.alerts.length > 0) {
+                var html = '';
+                data.alerts.forEach(function(alert) {
+                    var priorityClass = alert.priority === 'emergency' ? 'emergency' : (alert.priority === 'high' ? 'high' : (alert.priority === 'medium' ? 'medium' : 'low'));
+                    
+                    html += '<div class="global-alert-item p-3 priority-' + priorityClass + ' mb-2">';
+                    html += '<div class="d-flex justify-content-between align-items-start">';
+                    html += '<div><strong>' + alert.title + '</strong><br><small>' + (alert.message ? alert.message.substring(0, 150) : '') + '</small><br><small class="text-white-50">📍 ' + (alert.location || 'Global') + '</small>';
+                    if (alert.magnitude) {
+                        html += '<br><small class="text-white-50">📊 Magnitude: ' + alert.magnitude + '</small>';
+                    }
+                    html += '</div>';
+                    html += '</div></div>';
+                });
+                document.getElementById('globalAlertsContent').innerHTML = html;
+            } else {
+                document.getElementById('globalAlertsContent').innerHTML = '<div class="text-center py-5"><i class="fas fa-check-circle fa-3x text-light"></i><p class="mt-3">No global alerts at this moment</p></div>';
+            }
+        })
+        .catch(function(error) {
+            console.error('Error fetching global alerts:', error);
+            document.getElementById('globalAlertsContent').innerHTML = '<div class="alert alert-warning">Unable to fetch global alerts</div>';
+        })
+        .finally(function() {
+            document.getElementById('globalAlertsLoader').style.display = 'none';
+            document.getElementById('globalAlertsContent').style.display = 'block';
+        });
+}
+
+function refreshGlobalAlerts() {
+    var csrfToken = document.querySelector('[name=csrf-token]');
+    fetch('/alerts/global/refresh/', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrfToken ? csrfToken.content : '' }
+    })
+    .then(() => {
+        loadGlobalAlerts();
+        showToast('Alerts refreshed!', 'success');
+    })
+    .catch(() => {
+        showToast('Error refreshing alerts', 'error');
+    });
+}
+
+// ============================================
+// MARK ALERT AS READ
+// ============================================
+document.querySelectorAll('.mark-read').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var alertId = this.dataset.alertId;
+        var csrfToken = document.querySelector('[name=csrf-token]');
+        fetch('/alerts/mark-read/' + alertId + '/', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrfToken ? csrfToken.content : '' }
+        })
+        .then(() => {
+            this.closest('.alert-card').style.display = 'none';
+            showToast('Alert marked as read', 'success');
+        })
+        .catch(() => {
+            showToast('Error marking alert', 'error');
+        });
+    });
+});
+
+// ============================================
+// SEND ALERT
+// ============================================
+document.getElementById('submitAlert')?.addEventListener('click', function() {
+    var title = document.getElementById('alertTitle').value;
+    var message = document.getElementById('alertMessage').value;
+    
+    if (!title || !message) {
+        showToast('Please fill title and message', 'warning');
+        return;
+    }
+    
+    var data = {
+        title: title,
+        message: message,
+        alert_type: document.getElementById('alertType').value,
+        priority: document.getElementById('alertPriority').value,
+        location: document.getElementById('alertLocation').value,
+        latitude: document.getElementById('alertLatitude').value,
+        longitude: document.getElementById('alertLongitude').value,
+        send_to_all: document.getElementById('sendToAll').checked
+    };
+    
+    var btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    
+    var csrfToken = document.querySelector('[name=csrf-token]');
+    fetch('/alerts/send/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken ? csrfToken.content : ''
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(() => {
+        var modal = bootstrap.Modal.getInstance(document.getElementById('sendAlertModal'));
+        if (modal) modal.hide();
+        showToast('Alert sent successfully!', 'success');
+        setTimeout(() => location.reload(), 1500);
+    })
+    .catch(() => {
+        showToast('Error sending alert', 'error');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Alert';
+    });
+});
+
+// ============================================
+// SHOW TOAST NOTIFICATION
+// ============================================
+function showToast(message, type) {
+    var toastHtml = `
+        <div class="toast show" role="alert" style="min-width: 300px;">
+            <div class="toast-header bg-${type === 'success' ? 'success' : (type === 'warning' ? 'warning' : 'danger')} text-white">
+                <strong class="me-auto">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : (type === 'warning' ? 'fa-exclamation-triangle' : 'fa-times-circle')}"></i>
+                    ${type === 'success' ? 'Success' : (type === 'warning' ? 'Warning' : 'Error')}
+                </strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">${message}</div>
+        </div>
+    `;
+    var container = document.getElementById('notificationArea');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'notificationArea';
+        container.className = 'toast-notification';
+        document.body.appendChild(container);
+    }
+    container.insertAdjacentHTML('beforeend', toastHtml);
+    setTimeout(function() {
+        var toasts = document.querySelectorAll('.toast');
+        if (toasts.length) toasts[toasts.length - 1].remove();
+    }, 5000);
+}
+
+// ============================================
+// INITIALIZE
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+    loadGlobalAlerts();
+    setInterval(loadGlobalAlerts, 300000);
+});
+</script>
+{% endblock %}

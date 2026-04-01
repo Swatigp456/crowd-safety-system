@@ -1,0 +1,329 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Machine Learning Dashboard - Crowd Safety System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h2 class="mb-2"><i class="fas fa-brain"></i> Machine Learning Dashboard</h2>
+                    <p class="mb-0">AI-powered crowd prediction and incident classification</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Model Status Cards -->
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-line"></i> Crowd Predictor</h5>
+                </div>
+                <div class="card-body">
+                    <div id="crowdStatus" class="text-center py-3">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>
+                        <p class="mt-2">Checking status...</p>
+                    </div>
+                    <button class="btn btn-primary w-100 mt-2" onclick="trainCrowdModel()">
+                        <i class="fas fa-chart-line"></i> Train Crowd Model
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-tags"></i> Incident Classifier</h5>
+                </div>
+                <div class="card-body">
+                    <div id="incidentStatus" class="text-center py-3">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>
+                        <p class="mt-2">Checking status...</p>
+                    </div>
+                    <button class="btn btn-primary w-100 mt-2" onclick="trainIncidentModel()">
+                        <i class="fas fa-tags"></i> Train Incident Model
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Anomaly Detector</h5>
+                </div>
+                <div class="card-body">
+                    <div id="anomalyStatus" class="text-center py-3">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>
+                        <p class="mt-2">Checking status...</p>
+                    </div>
+                    <button class="btn btn-primary w-100 mt-2" onclick="trainAnomalyModel()">
+                        <i class="fas fa-exclamation-triangle"></i> Train Anomaly Model
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Prediction Section -->
+    <div class="row mt-4">
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-line"></i> Predict Crowd Density</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Location</label>
+                        <input type="text" id="predictLocation" class="form-control" placeholder="e.g., Times Square">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Hour (0-23)</label>
+                            <input type="number" id="predictHour" class="form-control" value="{{ now.hour }}" min="0" max="23">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Previous Crowd Count</label>
+                            <input type="number" id="predictPreviousCrowd" class="form-control" value="0">
+                        </div>
+                    </div>
+                    <button class="btn btn-success w-100" onclick="predictCrowd()">
+                        <i class="fas fa-chart-line"></i> Predict Crowd Density
+                    </button>
+                    <div id="crowdPredictionResult" class="mt-3" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-tags"></i> Classify Incident</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Title</label>
+                        <input type="text" id="classifyTitle" class="form-control" placeholder="e.g., Vehicle Collision">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Description</label>
+                        <textarea id="classifyDesc" class="form-control" rows="3" placeholder="Describe the incident..."></textarea>
+                    </div>
+                    <button class="btn btn-success w-100" onclick="classifyIncident()">
+                        <i class="fas fa-tags"></i> Classify Incident
+                    </button>
+                    <div id="classificationResult" class="mt-3" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Anomaly Detection Section -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Anomaly Detection</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Crowd Count</label>
+                            <input type="number" id="anomalyCount" class="form-control" placeholder="Number of people">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Hour</label>
+                            <input type="number" id="anomalyHour" class="form-control" value="{{ now.hour }}" min="0" max="23">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Day of Week (0-6)</label>
+                            <input type="number" id="anomalyDay" class="form-control" value="{{ now.weekday }}" min="0" max="6">
+                        </div>
+                    </div>
+                    <button class="btn btn-warning w-100" onclick="detectAnomaly()">
+                        <i class="fas fa-exclamation-triangle"></i> Detect Anomaly
+                    </button>
+                    <div id="anomalyResult" class="mt-3" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function getCSRFToken() {
+        return document.querySelector('[name=csrf-token]')?.content || 
+               document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)')?.pop();
+    }
+    
+    function loadModelStatus() {
+        fetch('/ml/model-status/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('crowdStatus').innerHTML = data.models.crowd_predictor ? 
+                        '<i class="fas fa-check-circle fa-2x text-success"></i><p class="mt-2">Model Trained</p>' :
+                        '<i class="fas fa-times-circle fa-2x text-danger"></i><p class="mt-2">Not Trained</p>';
+                    
+                    document.getElementById('incidentStatus').innerHTML = data.models.incident_classifier ? 
+                        '<i class="fas fa-check-circle fa-2x text-success"></i><p class="mt-2">Model Trained</p>' :
+                        '<i class="fas fa-times-circle fa-2x text-danger"></i><p class="mt-2">Not Trained</p>';
+                    
+                    document.getElementById('anomalyStatus').innerHTML = data.models.anomaly_detector ? 
+                        '<i class="fas fa-check-circle fa-2x text-success"></i><p class="mt-2">Model Trained</p>' :
+                        '<i class="fas fa-times-circle fa-2x text-danger"></i><p class="mt-2">Not Trained</p>';
+                }
+            });
+    }
+    
+    function trainCrowdModel() {
+        document.getElementById('crowdStatus').innerHTML = '<i class="fas fa-spinner fa-spin fa-2x"></i><p class="mt-2">Training...</p>';
+        fetch('/ml/train-crowd/', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCSRFToken() }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            loadModelStatus();
+        })
+        .catch(error => alert('Error: ' + error));
+    }
+    
+    function trainIncidentModel() {
+        document.getElementById('incidentStatus').innerHTML = '<i class="fas fa-spinner fa-spin fa-2x"></i><p class="mt-2">Training...</p>';
+        fetch('/ml/train-incident/', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCSRFToken() }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            loadModelStatus();
+        })
+        .catch(error => alert('Error: ' + error));
+    }
+    
+    function trainAnomalyModel() {
+        document.getElementById('anomalyStatus').innerHTML = '<i class="fas fa-spinner fa-spin fa-2x"></i><p class="mt-2">Training...</p>';
+        fetch('/ml/train-anomaly/', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCSRFToken() }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            loadModelStatus();
+        })
+        .catch(error => alert('Error: ' + error));
+    }
+    
+    function predictCrowd() {
+        const data = {
+            location: document.getElementById('predictLocation').value,
+            hour: parseInt(document.getElementById('predictHour').value),
+            previous_crowd: parseInt(document.getElementById('predictPreviousCrowd').value)
+        };
+        
+        fetch('/ml/predict-crowd/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            const resultDiv = document.getElementById('crowdPredictionResult');
+            if (data.status === 'success') {
+                let color = data.predicted_density === 'high' ? 'danger' : 
+                           (data.predicted_density === 'medium' ? 'warning' : 'success');
+                resultDiv.innerHTML = `
+                    <div class="alert alert-${color}">
+                        <strong>Predicted Density:</strong> ${data.predicted_density.toUpperCase()}<br>
+                        <strong>Confidence:</strong> ${(data.confidence * 100).toFixed(1)}%
+                    </div>
+                `;
+                resultDiv.style.display = 'block';
+            } else {
+                resultDiv.innerHTML = `<div class="alert alert-danger">Error: ${data.message}</div>`;
+                resultDiv.style.display = 'block';
+            }
+        });
+    }
+    
+    function classifyIncident() {
+        const data = {
+            title: document.getElementById('classifyTitle').value,
+            description: document.getElementById('classifyDesc').value,
+            hour: new Date().getHours()
+        };
+        
+        fetch('/ml/classify-incident/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            const resultDiv = document.getElementById('classificationResult');
+            if (data.status === 'success') {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-info">
+                        <strong>Predicted Type:</strong> ${data.predicted_type.toUpperCase()}<br>
+                        <strong>Confidence:</strong> ${(data.confidence * 100).toFixed(1)}%
+                    </div>
+                `;
+                resultDiv.style.display = 'block';
+            } else {
+                resultDiv.innerHTML = `<div class="alert alert-danger">Error: ${data.message}</div>`;
+                resultDiv.style.display = 'block';
+            }
+        });
+    }
+    
+    function detectAnomaly() {
+        const data = {
+            crowd_count: parseInt(document.getElementById('anomalyCount').value),
+            hour: parseInt(document.getElementById('anomalyHour').value),
+            day_of_week: parseInt(document.getElementById('anomalyDay').value)
+        };
+        
+        fetch('/ml/detect-anomaly/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            const resultDiv = document.getElementById('anomalyResult');
+            if (data.status === 'success') {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-${data.is_anomaly ? 'danger' : 'success'}">
+                        <strong>${data.message}</strong>
+                    </div>
+                `;
+                resultDiv.style.display = 'block';
+            } else {
+                resultDiv.innerHTML = `<div class="alert alert-danger">Error: ${data.message}</div>`;
+                resultDiv.style.display = 'block';
+            }
+        });
+    }
+    
+    // Load status on page load
+    loadModelStatus();
+</script>
+{% endblock %}

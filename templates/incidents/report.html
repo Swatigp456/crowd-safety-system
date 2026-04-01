@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Report Incident - Crowd Safety System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Report Incident</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form id="incidentForm" method="post" enctype="multipart/form-data" action="{% url 'incidents:report' %}">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Title *</label>
+                            <input type="text" class="form-control" id="title" name="title" 
+                                   placeholder="e.g., Vehicle collision at Main Street" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Description *</label>
+                            <textarea class="form-control" id="description" name="description" 
+                                      rows="4" placeholder="Describe what happened in detail..." required></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Incident Type *</label>
+                                <select class="form-select" id="incident_type" name="incident_type" required>
+                                    <option value="accident">🚗 Accident</option>
+                                    <option value="medical">🏥 Medical Emergency</option>
+                                    <option value="security">👮 Security Issue</option>
+                                    <option value="crowd">👥 Crowd Management</option>
+                                    <option value="fire">🔥 Fire</option>
+                                    <option value="other">📝 Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Location *</label>
+                                <input type="text" class="form-control" id="location" name="location" 
+                                       placeholder="Address or landmark" required>
+                                <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="getCurrentLocation()">
+                                    <i class="fas fa-location-dot"></i> Use My Current Location
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Latitude</label>
+                                <input type="text" class="form-control" id="latitude" name="latitude" readonly>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Longitude</label>
+                                <input type="text" class="form-control" id="longitude" name="longitude" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Image (Optional)</label>
+                            <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                            <div id="imagePreview" class="mt-2"></div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Video (Optional)</label>
+                            <input type="file" class="form-control" id="video" name="video" accept="video/*">
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Your report will be reviewed by security personnel. For emergencies, please use the PANIC button.
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary px-4" id="submitBtn">
+                                <i class="fas fa-paper-plane me-2"></i> Submit Report
+                            </button>
+                            <a href="{% url 'incidents:index' %}" class="btn btn-secondary px-4">
+                                <i class="fas fa-times me-2"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Get current location
+    function getCurrentLocation() {
+        if (navigator.geolocation) {
+            var locationInput = document.getElementById('location');
+            locationInput.disabled = true;
+            locationInput.value = 'Detecting location...';
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    var lat = position.coords.latitude;
+                    var lng = position.coords.longitude;
+                    
+                    document.getElementById('latitude').value = lat;
+                    document.getElementById('longitude').value = lng;
+                    
+                    // Get address from coordinates
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.display_name) {
+                                locationInput.value = data.display_name.split(',')[0];
+                            } else {
+                                locationInput.value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                            }
+                        })
+                        .catch(() => {
+                            locationInput.value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                        })
+                        .finally(() => {
+                            locationInput.disabled = false;
+                        });
+                    
+                    alert('Location captured!');
+                },
+                function(error) {
+                    locationInput.disabled = false;
+                    locationInput.value = '';
+                    alert('Unable to get location. Please enter manually.');
+                }
+            );
+        } else {
+            alert('Geolocation not supported by your browser');
+        }
+    }
+    
+    // Image preview
+    document.getElementById('image').addEventListener('change', function(e) {
+        var file = e.target.files[0];
+        var preview = document.getElementById('imagePreview');
+        if (file) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                preview.innerHTML = `
+                    <div class="alert alert-success mt-2">
+                        <i class="fas fa-check-circle"></i> Image loaded: ${file.name}
+                        <br>
+                        <img src="${e.target.result}" class="img-fluid rounded mt-2" style="max-height: 200px;">
+                    </div>
+                `;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            preview.innerHTML = '';
+        }
+    });
+    
+    // Form submit with AJAX (optional - fallback to normal submit)
+    document.getElementById('incidentForm').addEventListener('submit', function(e) {
+        // Let the form submit normally - no preventDefault
+        // This ensures the form works even if JavaScript fails
+        console.log("Form submitting...");
+        document.getElementById('submitBtn').innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Submitting...';
+        document.getElementById('submitBtn').disabled = true;
+        return true;
+    });
+</script>
+{% endblock %}

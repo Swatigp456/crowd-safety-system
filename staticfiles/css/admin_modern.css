@@ -1,0 +1,758 @@
+/* static/css/admin_modern.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ============================================
+   MODERN DJANGO ADMIN PANEL
+   Professional, Clean, High Contrast
+   ============================================ */
+
+:root {
+    /* Color Scheme - High Contrast */
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --primary-light: #3b82f6;
+    --secondary: #64748b;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --info: #06b6d4;
+    
+    /* Text Colors - High Contrast */
+    --text-primary: #0f172a;
+    --text-secondary: #1e293b;
+    --text-muted: #334155;
+    --text-light: #475569;
+    --text-white: #ffffff;
+    
+    /* Background Colors */
+    --bg-white: #ffffff;
+    --bg-light: #f8fafc;
+    --bg-gray: #f1f5f9;
+    --bg-dark: #0f172a;
+    --bg-sidebar: #0f172a;
+    
+    /* Border Colors */
+    --border-light: #e2e8f0;
+    --border-medium: #cbd5e1;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    
+    /* Spacing */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 0.75rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    
+    /* Border Radius */
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-light);
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* ============================================
+   HEADER STYLES
+   ============================================ */
+#header {
+    background: linear-gradient(135deg, var(--bg-dark) 0%, #1e293b 100%);
+    color: var(--text-white);
+    padding: 1rem 2rem;
+    box-shadow: var(--shadow-md);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+#branding h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+#branding h1 a {
+    color: var(--text-white);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#branding h1 a::before {
+    content: '🛡️';
+    font-size: 1.5rem;
+}
+
+#user-tools {
+    font-size: 0.875rem;
+    padding: 0.5rem 0;
+}
+
+#user-tools a {
+    color: var(--text-white);
+    text-decoration: none;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--radius-md);
+    transition: all 0.3s;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 0 2px;
+}
+
+#user-tools a:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+/* ============================================
+   SIDEBAR NAVIGATION
+   ============================================ */
+#nav-sidebar {
+    background: var(--bg-white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-md);
+    border: 1px solid var(--border-light);
+}
+
+#nav-sidebar .item {
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-md);
+    transition: all 0.3s;
+    margin-bottom: 2px;
+}
+
+#nav-sidebar .item:hover {
+    background: var(--bg-gray);
+}
+
+#nav-sidebar .item a {
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    display: block;
+}
+
+#nav-sidebar .item a:hover {
+    color: var(--primary);
+}
+
+/* ============================================
+   MODULE CARDS
+   ============================================ */
+.module {
+    background: var(--bg-white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    margin-bottom: var(--spacing-lg);
+    border: 1px solid var(--border-light);
+    transition: all 0.3s;
+}
+
+.module:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.module h2, .module caption {
+    background: var(--bg-light);
+    color: var(--text-primary);
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-weight: 600;
+    font-size: 1rem;
+    border-bottom: 2px solid var(--primary);
+    margin: 0;
+}
+
+.module h2 a, .module caption a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/* ============================================
+   TABLES - MODERN DESIGN
+   ============================================ */
+#changelist table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--bg-white);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+#changelist table thead th {
+    background: var(--bg-light);
+    color: var(--text-primary);
+    font-weight: 600;
+    padding: var(--spacing-md);
+    border: none;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-medium);
+}
+
+#changelist table tbody tr {
+    transition: all 0.2s;
+    border-bottom: 1px solid var(--border-light);
+}
+
+#changelist table tbody tr:hover {
+    background: var(--bg-light);
+    transform: scale(1.01);
+}
+
+#changelist table tbody td {
+    padding: var(--spacing-md);
+    color: var(--text-secondary);
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-light);
+}
+
+/* Alternating row colors */
+#changelist table tbody tr.row1 {
+    background: var(--bg-white);
+}
+
+#changelist table tbody tr.row2 {
+    background: #fefefe;
+}
+
+/* Table links */
+#changelist table tbody td a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+#changelist table tbody td a:hover {
+    text-decoration: underline;
+    color: var(--primary-dark);
+}
+
+/* ============================================
+   BUTTONS - MODERN
+   ============================================ */
+.button, input[type="submit"], input[type="button"], 
+.submit-row input, a.button {
+    background: var(--primary);
+    color: var(--text-white);
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.875rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.button:hover, input[type="submit"]:hover, 
+input[type="button"]:hover, .submit-row input:hover, 
+a.button:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.button.default, input[type="submit"].default, 
+.submit-row input.default {
+    background: var(--success);
+}
+
+.button.default:hover, input[type="submit"].default:hover, 
+.submit-row input.default:hover {
+    background: #059669;
+}
+
+/* Danger buttons */
+.deletelink, .deletelink-box a {
+    background: var(--danger);
+    color: var(--text-white);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.deletelink:hover, .deletelink-box a:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+}
+
+/* ============================================
+   SIDEBAR FILTER
+   ============================================ */
+#changelist-filter {
+    background: var(--bg-white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--spacing-lg);
+    border: 1px solid var(--border-light);
+}
+
+#changelist-filter h2 {
+    background: var(--bg-light);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--primary);
+}
+
+#changelist-filter a {
+    color: var(--text-secondary);
+    transition: all 0.3s;
+    padding: 0.375rem 0;
+    display: inline-block;
+    text-decoration: none;
+}
+
+#changelist-filter a:hover {
+    color: var(--primary);
+    padding-left: 0.5rem;
+}
+
+#changelist-filter li.selected a {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+/* ============================================
+   FORMS - CLEAN DESIGN
+   ============================================ */
+.form-row {
+    padding: var(--spacing-md) 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.form-row label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.aligned .form-row input, 
+.aligned .form-row select, 
+.aligned .form-row textarea {
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-md);
+    padding: 0.625rem 0.875rem;
+    transition: all 0.3s;
+    background: var(--bg-white);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    width: 100%;
+}
+
+.aligned .form-row input:focus, 
+.aligned .form-row select:focus, 
+.aligned .form-row textarea:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Help text */
+.help, .help-text {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+/* Error messages */
+.errorlist {
+    color: var(--danger);
+    list-style: none;
+    padding: 0;
+    margin: 0.25rem 0 0 0;
+    font-weight: 500;
+    font-size: 0.75rem;
+}
+
+/* ============================================
+   PAGINATION
+   ============================================ */
+.paginator {
+    background: var(--bg-white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
+    text-align: center;
+}
+
+.paginator a {
+    background: var(--bg-light);
+    color: var(--text-primary);
+    border-radius: var(--radius-md);
+    padding: 0.375rem 0.75rem;
+    transition: all 0.3s;
+    margin: 0 0.25rem;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.paginator a:hover {
+    background: var(--primary);
+    color: var(--text-white);
+    transform: translateY(-1px);
+}
+
+.paginator .this-page {
+    background: var(--primary);
+    color: var(--text-white);
+    border-radius: var(--radius-md);
+    padding: 0.375rem 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+/* ============================================
+   MESSAGES
+   ============================================ */
+.messagelist li {
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    margin-bottom: var(--spacing-sm);
+    border: none;
+    font-weight: 500;
+    box-shadow: var(--shadow-sm);
+}
+
+.messagelist li.success {
+    background: #d1fae5;
+    color: #065f46;
+    border-left: 4px solid var(--success);
+}
+
+.messagelist li.error {
+    background: #fee2e2;
+    color: #991b1b;
+    border-left: 4px solid var(--danger);
+}
+
+.messagelist li.warning {
+    background: #fed7aa;
+    color: #92400e;
+    border-left: 4px solid var(--warning);
+}
+
+.messagelist li.info {
+    background: #dbeafe;
+    color: #1e40af;
+    border-left: 4px solid var(--primary);
+}
+
+/* ============================================
+   DASHBOARD STATS CARDS
+   ============================================ */
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--bg-white);
+    padding: 1.5rem;
+    border-radius: var(--radius-xl);
+    text-align: center;
+    transition: all 0.3s;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
+    cursor: pointer;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.stat-card i {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+}
+
+.stat-card h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0.5rem 0;
+    color: var(--text-primary);
+}
+
+.stat-card p {
+    color: var(--text-muted);
+    margin: 0;
+    font-weight: 500;
+}
+
+/* ============================================
+   QUICK ACTIONS
+   ============================================ */
+.quick-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+}
+
+.quick-action-btn {
+    background: var(--bg-white);
+    color: var(--text-primary);
+    border: 1px solid var(--border-light);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.quick-action-btn:hover {
+    background: var(--primary);
+    color: var(--text-white);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.admin-footer {
+    background: var(--bg-dark);
+    color: var(--text-white);
+    padding: 1.5rem;
+    text-align: center;
+    margin-top: 2rem;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 768px) {
+    #header {
+        padding: 1rem;
+    }
+    
+    #branding h1 {
+        font-size: 1.25rem;
+    }
+    
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .footer-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .quick-actions {
+        flex-direction: column;
+    }
+    
+    #changelist table thead th,
+    #changelist table tbody td {
+        padding: 0.75rem;
+    }
+    
+    .paginator a, .paginator .this-page {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* ============================================
+   SCROLLBAR - MODERN
+   ============================================ */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-gray);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.module, .stat-card, .quick-action-btn {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* ============================================
+   LOGIN PAGE - MODERN
+   ============================================ */
+.login {
+    background: linear-gradient(135deg, var(--bg-dark) 0%, #1e293b 100%);
+}
+
+.login #container {
+    background: transparent;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login .login-logo {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.login .login-logo h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-white);
+}
+
+.login .form-row {
+    margin-bottom: 1.5rem;
+}
+
+.login input[type="text"],
+.login input[type="password"] {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+}
+
+.login input[type="text"]:focus,
+.login input[type="password"]:focus {
+    border-color: var(--primary);
+    outline: none;
+    background: var(--bg-white);
+}
+
+.login .submit-row {
+    text-align: center;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.login input[type="submit"] {
+    background: var(--primary);
+    color: var(--text-white);
+    width: 100%;
+    padding: 0.875rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: var(--radius-lg);
+}
+
+.login input[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Dark Mode Toggle (Optional) */
+.dark-mode-toggle {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: var(--bg-white);
+    border: 1px solid var(--border-light);
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+    z-index: 1000;
+    transition: all 0.3s;
+}
+
+.dark-mode-toggle:hover {
+    transform: scale(1.1);
+}
+
+/* Dark Mode Styles (Optional) */
+body.dark-mode {
+    --bg-light: #1e293b;
+    --bg-white: #0f172a;
+    --text-primary: #f1f5f9;
+    --text-secondary: #e2e8f0;
+    --text-muted: #94a3b8;
+    --border-light: #334155;
+}
+
+body.dark-mode .stat-card,
+body.dark-mode .module,
+body.dark-mode #changelist-filter {
+    background: #1e293b;
+}

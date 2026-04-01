@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>{% block title %}Crowd Safety System{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #7c3aed;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1f2937;
+            --light: #f9fafb;
+        }
+        
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark);
+        }
+        
+        /* Navbar Styles */
+        .navbar {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            padding: 0.8rem 1rem;
+        }
+        
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .nav-link {
+            font-weight: 500;
+            color: var(--dark);
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+        
+        /* Alert Badge */
+        .alert-badge {
+            position: absolute;
+            top: -5px;
+            right: -8px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 10px;
+            min-width: 18px;
+            text-align: center;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        /* Card Styles */
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+        }
+        
+        /* Button Styles */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 12px;
+            padding: 10px 25px;
+            font-weight: 500;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37,99,235,0.4);
+        }
+        
+        /* Panic Button */
+        .panic-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--danger), #dc2626);
+            color: white;
+            border: none;
+            cursor: pointer;
+            z-index: 1000;
+            animation: pulse-danger 2s infinite;
+            transition: all 0.3s;
+        }
+        
+        .panic-button:hover {
+            transform: scale(1.1);
+        }
+        
+        @keyframes pulse-danger {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* Toast Notifications */
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 380px;
+        }
+        
+        .toast {
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .panic-button {
+                width: 55px;
+                height: 55px;
+                bottom: 20px;
+                right: 20px;
+            }
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+        }
+        body.dark-mode {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #f0f0f0;
+}
+body.dark-mode .card,
+body.dark-mode .stat-card,
+body.dark-mode .info-panel {
+    background: #1e1e2e;
+    color: #f0f0f0;
+}
+body.dark-mode .navbar {
+    background: #0f0f1a;
+}
+body.dark-mode .btn-outline-secondary {
+    color: #fff;
+    border-color: #fff;
+}
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <!-- Navigation Bar -->
+     <!-- Safety Tip Banner -->
+<div class="alert alert-info alert-dismissible fade show mb-0" style="border-radius: 0;">
+    <div class="container">
+        <i class="fas fa-lightbulb"></i>
+        <strong>💡 Safety Tip of the Day:</strong>
+        <span id="safetyTip">Loading...</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+</div>
+
+<script>
+const safetyTips = [
+    "Always know the nearest exit in any building",
+    "Stay aware of your surroundings in crowded places",
+    "Keep emergency contacts saved on your phone",
+    "If you get separated from friends, have a meeting point",
+    "Avoid displaying expensive items in public",
+    "Walk confidently and make eye contact",
+    "Trust your instincts - if something feels wrong, leave",
+    "Keep your phone charged when going out",
+    "Share your location with trusted contacts",
+    "In an emergency, call for help immediately"
+];
+
+// Show random tip
+function showRandomTip() {
+    const randomIndex = Math.floor(Math.random() * safetyTips.length);
+    document.getElementById('safetyTip').innerText = safetyTips[randomIndex];
+}
+
+// Change tip every day
+showRandomTip();
+setInterval(showRandomTip, 86400000); // Every 24 hours
+</script>
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'dashboard:index' %}">
+                <i class="fas fa-shield-alt"></i> Crowd Safety
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'index' and request.resolver_match.app_name == 'dashboard' %}active{% endif %}" 
+                           href="{% url 'dashboard:index' %}">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.app_name == 'monitoring' %}active{% endif %}" 
+                           href="{% url 'monitoring:index' %}">
+                            <i class="fas fa-map-marked-alt"></i> Monitor
+                        </a>
+                    </li>
+                    <li class="nav-item position-relative">
+                        <a class="nav-link {% if request.resolver_match.app_name == 'alerts' %}active{% endif %}" 
+                           href="{% url 'alerts:index' %}">
+                            <i class="fas fa-bell"></i> Alerts
+                            <span id="alertBadge" class="alert-badge" style="display: none;">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.app_name == 'incidents' %}active{% endif %}" 
+                           href="{% url 'incidents:index' %}">
+                            <i class="fas fa-exclamation-triangle"></i> Incidents
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.app_name == 'ml' %}active{% endif %}" 
+                           href="{% url 'ml:dashboard' %}">
+                            <i class="fas fa-brain"></i> ML Analytics
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.app_name == 'ai' %}active{% endif %}" 
+                           href="{% url 'ai:chat_page' %}">
+                            <i class="fas fa-robot"></i> AI Assistant
+                        </a>
+                    </li>
+                    {% if user.role == 'admin' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'dashboard:user_management' %}">
+                            <i class="fas fa-users"></i> Users
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item dropdown">
+                        <!-- Add this button next to user dropdown -->
+<li class="nav-item">
+    <a class="nav-link" href="#" id="darkModeToggle">
+        <i class="fas fa-moon"></i>
+    </a>
+</li>
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle"></i> {{ user.username }}
+                            {% if user.role == 'admin' %}
+                            <span class="badge bg-danger ms-1">Admin</span>
+                            {% elif user.role == 'security' %}
+                            <span class="badge bg-warning ms-1">Security</span>
+                            {% endif %}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">
+                                <i class="fas fa-id-card"></i> Profile
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+    
+    <!-- Notification Area -->
+    <div class="toast-notification" id="notificationArea"></div>
+    
+    <!-- Main Content -->
+    <div class="container mt-4">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %} me-2"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </div>
+    
+    <!-- Panic Button -->
+    {% if user.is_authenticated %}
+    <button class="panic-button" onclick="triggerPanic()">
+        <i class="fas fa-exclamation-triangle fa-2x"></i>
+    </button>
+    {% endif %}
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        // Get CSRF token
+        function getCSRFToken() {
+            return document.querySelector('[name=csrf-token]')?.content || 
+                   document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)')?.pop();
+        }
+        
+        // WebSocket connection
+        let alertSocket = null;
+        
+        function connectWebSocket() {
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            alertSocket = new WebSocket(`${wsProtocol}//${window.location.host}/ws/alerts/`);
+            
+            alertSocket.onmessage = function(event) {
+                const alert = JSON.parse(event.data);
+                showNotification(alert);
+                updateAlertBadge();
+            };
+            
+            alertSocket.onclose = function() {
+                setTimeout(connectWebSocket, 3000);
+            };
+        }
+        
+        function showNotification(alert) {
+            const toastHtml = `
+                <div class="toast show" role="alert">
+                    <div class="toast-header ${alert.priority === 'emergency' ? 'bg-danger text-white' : 'bg-warning'}">
+                        <strong class="me-auto">
+                            <i class="fas ${alert.priority === 'emergency' ? 'fa-skull-crosswalk' : 'fa-exclamation-triangle'} me-2"></i>
+                            ${alert.priority === 'emergency' ? 'EMERGENCY' : 'ALERT'}
+                        </strong>
+                        <small>Just now</small>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body">
+                        <h6 class="mb-2">${escapeHtml(alert.title)}</h6>
+                        <p class="mb-2">${escapeHtml(alert.message)}</p>
+                        ${alert.location ? `<small class="text-muted"><i class="fas fa-location-dot"></i> ${escapeHtml(alert.location)}</small>` : ''}
+                        <div class="mt-2">
+                            <button class="btn btn-sm btn-primary" onclick="viewOnMap(${alert.latitude}, ${alert.longitude})">
+                                View Map
+                            </button>
+                            <button class="btn btn-sm btn-success" onclick="acknowledgeAlert(${alert.id})">
+                                Acknowledge
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('#notificationArea').prepend(toastHtml);
+            
+            if (alert.priority === 'emergency') {
+                playAlertSound();
+            }
+            
+            setTimeout(() => {
+                $('.toast').last().fadeOut(300, function() { $(this).remove(); });
+            }, 10000);
+        }
+        
+        function updateAlertBadge() {
+            $.get('/api/alerts/', function(response) {
+                if (response.status === 'success') {
+                    const unread = response.alerts.filter(a => !a.read).length;
+                    if (unread > 0) {
+                        $('#alertBadge').text(unread).show();
+                    } else {
+                        $('#alertBadge').hide();
+                    }
+                }
+            });
+        }
+        
+        function triggerPanic() {
+            if (confirm('⚠️ EMERGENCY: Trigger panic alert?')) {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(pos) {
+                        $.post('/alerts/panic/', {
+                            latitude: pos.coords.latitude,
+                            longitude: pos.coords.longitude,
+                            message: 'Emergency!',
+                            csrfmiddlewaretoken: getCSRFToken()
+                        }, function() {
+                            alert('🚨 Emergency alert sent! Help is on the way.');
+                        });
+                    });
+                } else {
+                    alert('Please enable location services');
+                }
+            }
+        }
+        
+        function viewOnMap(lat, lng) {
+            window.open(`/monitoring/?lat=${lat}&lng=${lng}&showAlert=true`, '_blank');
+        }
+        
+        function acknowledgeAlert(id) {
+            $.post(`/alerts/mark-read/${id}/`, {
+                csrfmiddlewaretoken: getCSRFToken()
+            }, updateAlertBadge);
+        }
+        
+        function playAlertSound() {
+            const audio = new Audio('data:audio/wav;base64,U3RlYWx0aCBzb3VuZA==');
+            audio.play().catch(e => console.log('Audio play failed'));
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        $(document).ready(function() {
+            connectWebSocket();
+            updateAlertBadge();
+            setInterval(updateAlertBadge, 60000);
+        });
+        
+        window.viewOnMap = viewOnMap;
+        window.acknowledgeAlert = acknowledgeAlert;
+        window.triggerPanic = triggerPanic;
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+    <!-- Quick Emergency Contacts Button -->
+<button class="btn btn-danger rounded-circle position-fixed" 
+        style="bottom: 100px; right: 20px; width: 50px; height: 50px; z-index: 999;"
+        data-bs-toggle="modal" data-bs-target="#emergencyModal">
+    <i class="fas fa-phone-alt fa-lg"></i>
+</button>
+
+<!-- Emergency Contacts Modal -->
+<div class="modal fade" id="emergencyModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-ambulance"></i> Emergency Contacts</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="list-group">
+                    <a href="tel:911" class="list-group-item list-group-item-action">
+                        <i class="fas fa-phone-alt text-danger"></i> <strong>Police / Emergency</strong><br>
+                        <small>911</small>
+                    </a>
+                    <a href="tel:108" class="list-group-item list-group-item-action">
+                        <i class="fas fa-ambulance text-danger"></i> <strong>Ambulance</strong><br>
+                        <small>108</small>
+                    </a>
+                    <a href="tel:101" class="list-group-item list-group-item-action">
+                        <i class="fas fa-fire-extinguisher text-danger"></i> <strong>Fire Department</strong><br>
+                        <small>101</small>
+                    </a>
+                    <a href="tel:1091" class="list-group-item list-group-item-action">
+                        <i class="fas fa-female text-danger"></i> <strong>Women Helpline</strong><br>
+                        <small>1091</small>
+                    </a>
+                    <a href="tel:1098" class="list-group-item list-group-item-action">
+                        <i class="fas fa-child text-danger"></i> <strong>Child Helpline</strong><br>
+                        <small>1098</small>
+                    </a>
+                </div>
+                <hr>
+                <div class="text-center">
+                    <p class="mb-0"><strong>Your Location:</strong> <span id="emergencyLocation">Detecting...</span></p>
+                    <button class="btn btn-sm btn-outline-danger mt-2" onclick="shareLocation()">
+                        <i class="fas fa-share-alt"></i> Share Location with Emergency Services
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Get current location for emergency
+function shareLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            const message = `EMERGENCY! I need help. Location: https://maps.google.com/?q=${lat},${lng}`;
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(message);
+            alert("Location copied! Share with emergency services.");
+        });
+    } else {
+        alert("Location detection not supported");
+    }
+}
+
+// Update location in modal
+function updateEmergencyLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            document.getElementById('emergencyLocation').innerText = 
+                `${position.coords.latitude.toFixed(4)}, ${position.coords.longitude.toFixed(4)}`;
+        });
+    }
+}
+setInterval(updateEmergencyLocation, 30000);
+updateEmergencyLocation();
+</script>
+<!-- Feedback Button -->
+<button class="btn btn-info rounded-circle position-fixed" 
+        style="bottom: 170px; right: 20px; width: 50px; height: 50px; z-index: 999;"
+        data-bs-toggle="modal" data-bs-target="#feedbackModal">
+    <i class="fas fa-comment-dots fa-lg"></i>
+</button>
+
+<!-- Feedback Modal -->
+<div class="modal fade" id="feedbackModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="fas fa-comment"></i> Send Feedback</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="feedbackForm">
+                    <div class="mb-3">
+                        <label class="form-label">How was your experience?</label>
+                        <div class="rating-stars text-center">
+                            <i class="far fa-star fa-2x star" data-value="1"></i>
+                            <i class="far fa-star fa-2x star" data-value="2"></i>
+                            <i class="far fa-star fa-2x star" data-value="3"></i>
+                            <i class="far fa-star fa-2x star" data-value="4"></i>
+                            <i class="far fa-star fa-2x star" data-value="5"></i>
+                        </div>
+                        <input type="hidden" id="ratingValue" value="0">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Your Feedback</label>
+                        <textarea id="feedbackMessage" class="form-control" rows="3" placeholder="Tell us what you think..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-info w-100">Send Feedback</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.rating-stars i {
+    cursor: pointer;
+    color: #ffc107;
+    margin: 0 5px;
+    transition: all 0.2s;
+}
+.rating-stars i:hover,
+.rating-stars i.active {
+    transform: scale(1.2);
+}
+</style>
+
+<script>
+// Star rating
+document.querySelectorAll('.star').forEach(star => {
+    star.addEventListener('click', function() {
+        const value = this.dataset.value;
+        document.getElementById('ratingValue').value = value;
+        
+        document.querySelectorAll('.star').forEach(s => {
+            if (s.dataset.value <= value) {
+                s.classList.add('fas');
+                s.classList.remove('far');
+                s.classList.add('active');
+            } else {
+                s.classList.remove('fas');
+                s.classList.add('far');
+                s.classList.remove('active');
+            }
+        });
+    });
+});
+
+// Submit feedback
+document.getElementById('feedbackForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const rating = document.getElementById('ratingValue').value;
+    const message = document.getElementById('feedbackMessage').value;
+    
+    if (!rating || rating == 0) {
+        alert('Please select a rating');
+        return;
+    }
+    
+    fetch('/api/feedback/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({ rating: rating, message: message })
+    })
+    .then(() => {
+        alert('Thank you for your feedback!');
+        bootstrap.Modal.getInstance(document.getElementById('feedbackModal')).hide();
+        document.getElementById('feedbackForm').reset();
+        document.querySelectorAll('.star').forEach(s => {
+            s.classList.remove('fas', 'active');
+            s.classList.add('far');
+        });
+    });
+});
+
+// Dark Mode Toggle
+</script>
+<script>
+// Dark Mode Toggle
+const darkModeToggle = document.getElementById('darkModeToggle');
+const darkMode = localStorage.getItem('darkMode');
+
+if (darkMode === 'enabled') {
+    document.body.classList.add('dark-mode');
+    darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+}
+
+darkModeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    if (document.body.classList.contains('dark-mode')) {
+        localStorage.setItem('darkMode', 'enabled');
+        darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+    } else {
+        localStorage.setItem('darkMode', 'disabled');
+        darkModeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+    }
+});
+</script> 
+</body>
+</html>

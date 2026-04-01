@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics Reports - Crowd Safety System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .report-card {
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        transition: all 0.3s;
+    }
+    
+    .report-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+    }
+    
+    .date-range-picker {
+        background: white;
+        border-radius: 20px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    
+    .stat-summary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 15px;
+        padding: 1rem;
+        color: white;
+        text-align: center;
+    }
+    
+    .export-btn {
+        background: linear-gradient(135deg, #84fab0, #8fd3f4);
+        border: none;
+        padding: 10px 20px;
+        border-radius: 50px;
+        color: #2d3748;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .export-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(132, 250, 176, 0.4);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="fas fa-chart-bar me-2"></i>Analytics Reports</h2>
+            <p class="text-muted">Comprehensive analytics and insights</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <button class="export-btn" onclick="exportReport()">
+                <i class="fas fa-download me-2"></i>Export Report
+            </button>
+        </div>
+    </div>
+    
+    <!-- Date Range Picker -->
+    <div class="date-range-picker">
+        <form method="get" class="row g-3">
+            <div class="col-md-5">
+                <label class="form-label">From Date</label>
+                <input type="date" name="from" class="form-control" value="{{ request.GET.from }}">
+            </div>
+            <div class="col-md-5">
+                <label class="form-label">To Date</label>
+                <input type="date" name="to" class="form-control" value="{{ request.GET.to }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <button type="submit" class="btn btn-primary w-100">Apply Filter</button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Summary Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-summary">
+                <i class="fas fa-chart-line fa-2x mb-2"></i>
+                <div class="h3 mb-0">{{ total_incidents }}</div>
+                <small>Total Incidents</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-summary" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                <i class="fas fa-check-circle fa-2x mb-2"></i>
+                <div class="h3 mb-0">{{ resolved_incidents }}</div>
+                <small>Resolved</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-summary" style="background: linear-gradient(135deg, #fa709a, #fee140);">
+                <i class="fas fa-chart-line fa-2x mb-2"></i>
+                <div class="h3 mb-0">{% widthratio resolved_incidents total_incidents 100 %}%</div>
+                <small>Resolution Rate</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-summary" style="background: linear-gradient(135deg, #30cfd0, #330867);">
+                <i class="fas fa-clock fa-2x mb-2"></i>
+                <div class="h3 mb-0">2.3</div>
+                <small>Avg Response (min)</small>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="report-card">
+                <h5><i class="fas fa-chart-pie me-2"></i>Incidents by Type</h5>
+                <canvas id="incidentTypeChart" height="300"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="report-card">
+                <h5><i class="fas fa-chart-line me-2"></i>Incidents Trend</h5>
+                <canvas id="incidentTrendChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Detailed Table -->
+    <div class="report-card">
+        <h5><i class="fas fa-table me-2"></i>Incident Details</h5>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th>Reported By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for incident in incidents %}
+                    <tr>
+                        <td>{{ incident.reported_at|date:"Y-m-d H:i" }}</td>
+                        <td>{{ incident.title|truncatechars:40 }}</td>
+                        <td>
+                            <span class="badge bg-{% if incident.incident_type == 'accident' %}danger{% elif incident.incident_type == 'medical' %}warning{% else %}info{% endif %}">
+                                {{ incident.get_incident_type_display }}
+                            </span>
+                        </td>
+                        <td>{{ incident.location|truncatechars:30 }}</td>
+                        <td>
+                            <span class="badge bg-{% if incident.status == 'pending' %}danger{% elif incident.status == 'investigating' %}warning{% elif incident.status == 'resolved' %}success{% else %}secondary{% endif %}">
+                                {{ incident.get_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ incident.reported_by.username }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                            <p>No incidents found for the selected period</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Incident Type Chart
+    const typeData = {
+        {% regroup incidents by incident_type as type_list %}
+        labels: [{% for type in type_list %}'{{ type.grouper|title }}',{% endfor %}],
+        datasets: [{
+            data: [{% for type in type_list %}{{ type.list|length }},{% endfor %}],
+            backgroundColor: ['#f72585', '#4cc9f0', '#f8961e', '#4361ee', '#3f37c9', '#4895ef']
+        }]
+    };
+    
+    new Chart(document.getElementById('incidentTypeChart'), {
+        type: 'pie',
+        data: typeData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+    
+    // Incident Trend Chart
+    const trendData = {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [{
+            label: 'Incidents',
+            data: [12, 19, 15, 17, 14, 10, 8],
+            borderColor: '#667eea',
+            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    };
+    
+    new Chart(document.getElementById('incidentTrendChart'), {
+        type: 'line',
+        data: trendData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            }
+        }
+    });
+    
+    function exportReport() {
+        alert('Export functionality - Would download PDF/Excel report');
+    }
+</script>
+{% endblock %}

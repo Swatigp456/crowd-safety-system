@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Incident Reports - Crowd Safety System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-exclamation-triangle text-danger me-2"></i>Incident Reports</h2>
+        <a href="{% url 'incidents:report' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Report Incident
+        </a>
+    </div>
+    
+    <div class="card shadow-sm">
+        <div class="card-body">
+            {% if incidents %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Type</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                            <th>Reported By</th>
+                            <th>Time</th>
+                            <th>Action</th>
+                        </thead>
+                        <tbody>
+                            {% for incident in incidents %}
+                            <tr>
+                                <td>#{{ incident.id }}</td>
+                                <td>
+                                    <strong>{{ incident.title|truncatechars:40 }}</strong>
+                                    {% if incident.image %}
+                                    <i class="fas fa-image text-info ms-1" title="Has image"></i>
+                                    {% endif %}
+                                    {% if incident.video %}
+                                    <i class="fas fa-video text-info ms-1" title="Has video"></i>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-{% if incident.incident_type == 'accident' %}danger{% elif incident.incident_type == 'medical' %}warning{% elif incident.incident_type == 'fire' %}danger{% else %}info{% endif %}">
+                                        {{ incident.get_incident_type_display }}
+                                    </span>
+                                </td>
+                                <td>{{ incident.location|truncatechars:30 }}</td>
+                                <td>
+                                    <span class="badge bg-{% if incident.status == 'pending' %}danger{% elif incident.status == 'investigating' %}warning{% elif incident.status == 'resolved' %}success{% else %}secondary{% endif %}">
+                                        {{ incident.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>{{ incident.reported_by.username }}</td>
+                                <td>{{ incident.reported_at|timesince }} ago</td>
+                                <td>
+                                    <a href="{% url 'incidents:detail' incident.id %}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                {% if incidents.has_other_pages %}
+                <nav class="mt-3">
+                    <ul class="pagination justify-content-center">
+                        {% if incidents.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ incidents.previous_page_number }}">Previous</a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in incidents.paginator.page_range %}
+                        <li class="page-item {% if incidents.number == num %}active{% endif %}">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                        {% endfor %}
+                        
+                        {% if incidents.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ incidents.next_page_number }}">Next</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+                
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                    <h4>No Incidents Reported</h4>
+                    <p class="text-muted">All clear! No incidents have been reported yet.</p>
+                    <a href="{% url 'incidents:report' %}" class="btn btn-primary mt-2">
+                        <i class="fas fa-plus"></i> Report First Incident
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

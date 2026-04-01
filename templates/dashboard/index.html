@@ -1,0 +1,430 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Crowd Safety System{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Dashboard Styles */
+    .stat-card {
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #2563eb;
+        margin: 0.5rem 0;
+    }
+    
+    .chart-container {
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .chart-header {
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 0.75rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .chart-header h5 {
+        margin: 0;
+        font-weight: 600;
+        color: #1f2937;
+    }
+    
+    .density-legend {
+        padding: 0.5rem;
+        text-align: center;
+        background: #f9fafb;
+        border-radius: 12px;
+    }
+    
+    .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 5px;
+    }
+    
+    .incidents-table {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .incidents-table thead {
+        background: #f9fafb;
+    }
+    
+    .incidents-table thead th {
+        padding: 1rem;
+        font-weight: 600;
+        color: #1f2937;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .incidents-table tbody td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .incidents-table tbody tr:hover {
+        background: #f9fafb;
+    }
+    
+    .badge-pending { background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 20px; font-size: 12px; display: inline-block; }
+    .badge-resolved { background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 20px; font-size: 12px; display: inline-block; }
+    .badge-investigating { background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 20px; font-size: 12px; display: inline-block; }
+    
+    @media (max-width: 768px) {
+        .stat-number { font-size: 1.5rem; }
+        .chart-container { padding: 1rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-4">
+    <!-- Welcome Banner -->
+    <div class="bg-gradient-primary text-white rounded-4 p-4 mb-4" style="background: linear-gradient(135deg, #2563eb, #7c3aed);">
+        <h2 class="mb-2">Welcome back, {{ user.get_full_name|default:user.username }}! 👋</h2>
+        <p class="mb-0 opacity-75">Here's what's happening with your crowd safety system today.</p>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                <h3 class="stat-number">{{ total_users|default:"0" }}</h3>
+                <p class="text-muted mb-0">Total Users</p>
+            </div>
+        </div>
+        <!-- Add this card after your existing stats cards -->
+<div class="col-md-3 mb-3">
+    <div class="stat-card" onclick="location.href='{% url 'ml:dashboard' %}'">
+        <i class="fas fa-brain fa-2x" style="color: #7c3aed;"></i>
+        <div class="stat-number">ML</div>
+        <div>Analytics</div>
+        <small class="text-muted">AI-powered predictions</small>
+    </div>
+</div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <i class="fas fa-bell fa-2x text-warning mb-2"></i>
+                <h3 class="stat-number">{{ active_alerts|default:"0" }}</h3>
+                <p class="text-muted mb-0">Active Alerts</p>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <i class="fas fa-exclamation-triangle fa-2x text-danger mb-2"></i>
+                <h3 class="stat-number">{{ total_incidents|default:"0" }}</h3>
+                <p class="text-muted mb-0">Pending Incidents</p>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stat-card">
+                <i class="fas fa-phone-alt fa-2x text-success mb-2"></i>
+                <h3 class="stat-number">{{ active_panics|default:"0" }}</h3>
+                <p class="text-muted mb-0">Active Panics</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Crowd Density Distribution Chart -->
+        <div class="col-lg-6 mb-3">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h5><i class="fas fa-chart-pie me-2"></i>Crowd Density Distribution</h5>
+                    <span class="badge bg-secondary">Last 24 hours</span>
+                </div>
+                <canvas id="densityChart" height="250"></canvas>
+                <div class="row mt-4 text-center">
+                    <div class="col-4">
+                        <div class="density-legend">
+                            <span class="legend-color" style="background: #10b981;"></span>
+                            <strong>Low Density</strong>
+                            <div id="lowPercent" class="mt-1">0%</div>
+                            <small class="text-muted" id="lowCount">0 locations</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="density-legend">
+                            <span class="legend-color" style="background: #f59e0b;"></span>
+                            <strong>Medium Density</strong>
+                            <div id="mediumPercent" class="mt-1">0%</div>
+                            <small class="text-muted" id="mediumCount">0 locations</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="density-legend">
+                            <span class="legend-color" style="background: #ef4444;"></span>
+                            <strong>High Density</strong>
+                            <div id="highPercent" class="mt-1">0%</div>
+                            <small class="text-muted" id="highCount">0 locations</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Hourly Crowd Activity Chart -->
+        <div class="col-lg-6 mb-3">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h5><i class="fas fa-chart-line me-2"></i>Hourly Crowd Activity</h5>
+                    <span class="badge bg-secondary">Last 24 hours</span>
+                </div>
+                <canvas id="hourlyChart" height="250"></canvas>
+                <div class="mt-3 text-center" id="peakHoursInfo"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Incidents Table -->
+    <div class="incidents-table">
+        <div class="p-3 bg-white border-bottom">
+            <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Incidents</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th>Reported At</th>
+                    </thead>
+                <tbody>
+                    {% for incident in recent_incidents %}
+                    <tr>
+                        <td>#{{ incident.id }}</td>
+                        <td>{{ incident.title|truncatechars:35 }}</td>
+                        <td><span class="badge bg-info">{{ incident.get_incident_type_display }}</span></td>
+                        <td>{{ incident.location|truncatechars:25 }}</td>
+                        <td>
+                            <span class="badge-{{ incident.status }}">
+                                {{ incident.get_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ incident.reported_at|timesince }} ago</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <i class="fas fa-check-circle fa-3x text-success mb-2 d-block"></i>
+                            <p class="mb-0">No incidents reported. All clear! 🎉</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Data from Django backend
+    const densityData = {{ density_stats|safe }};
+    const hourlyData = {{ hourly_crowd|safe }};
+    const hourLabels = {{ hour_labels|safe }};
+    
+    console.log("Density Data:", densityData);
+    console.log("Hourly Data:", hourlyData);
+    console.log("Hour Labels:", hourLabels);
+    
+    // ============================================
+    // CROWD DENSITY DISTRIBUTION CHART
+    // ============================================
+    
+    // Calculate totals and percentages
+    const total = (densityData.low || 0) + (densityData.medium || 0) + (densityData.high || 0);
+    
+    if (total > 0) {
+        const lowPercent = Math.round((densityData.low / total) * 100);
+        const mediumPercent = Math.round((densityData.medium / total) * 100);
+        const highPercent = Math.round((densityData.high / total) * 100);
+        
+        document.getElementById('lowPercent').innerText = lowPercent + '%';
+        document.getElementById('mediumPercent').innerText = mediumPercent + '%';
+        document.getElementById('highPercent').innerText = highPercent + '%';
+        document.getElementById('lowCount').innerText = densityData.low + ' locations';
+        document.getElementById('mediumCount').innerText = densityData.medium + ' locations';
+        document.getElementById('highCount').innerText = densityData.high + ' locations';
+    }
+    
+    // Create Doughnut Chart
+    const densityCtx = document.getElementById('densityChart').getContext('2d');
+    new Chart(densityCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Low Density', 'Medium Density', 'High Density'],
+            datasets: [{
+                data: [densityData.low || 0, densityData.medium || 0, densityData.high || 0],
+                backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            cutout: '65%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        font: { size: 12, weight: '500' },
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                            return `${label}: ${value} locations (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // ============================================
+    // HOURLY CROWD ACTIVITY CHART
+    // ============================================
+    
+    // Find peak hour
+    let maxValue = 0;
+    let peakHourIndex = 0;
+    for (let i = 0; i < hourlyData.length; i++) {
+        if (hourlyData[i] > maxValue) {
+            maxValue = hourlyData[i];
+            peakHourIndex = i;
+        }
+    }
+    const peakHour = hourLabels[peakHourIndex];
+    
+    if (maxValue > 0) {
+        document.getElementById('peakHoursInfo').innerHTML = `
+            <div class="alert alert-success mb-0">
+                <i class="fas fa-chart-line me-2"></i>
+                <strong>Peak Activity:</strong> ${peakHour} with <strong>${Math.round(maxValue)}</strong> people
+            </div>
+        `;
+    } else {
+        document.getElementById('peakHoursInfo').innerHTML = `
+            <div class="alert alert-info mb-0">
+                <i class="fas fa-info-circle me-2"></i>
+                No crowd data available yet. Data will appear as people are detected.
+            </div>
+        `;
+    }
+    
+    // Create Line Chart
+    const hourlyCtx = document.getElementById('hourlyChart').getContext('2d');
+    new Chart(hourlyCtx, {
+        type: 'line',
+        data: {
+            labels: hourLabels,
+            datasets: [{
+                label: 'People Count',
+                data: hourlyData,
+                borderColor: '#2563eb',
+                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#2563eb',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `👥 People: ${Math.round(context.raw)}`;
+                        }
+                    }
+                },
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#e5e7eb' },
+                    title: {
+                        display: true,
+                        text: 'Number of People',
+                        font: { weight: 'bold', size: 12 }
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString();
+                        }
+                    }
+                },
+                x: {
+                    grid: { display: false },
+                    title: {
+                        display: true,
+                        text: 'Time (Last 24 Hours)',
+                        font: { weight: 'bold', size: 12 }
+                    },
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45,
+                        autoSkip: true,
+                        maxTicksLimit: 12
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

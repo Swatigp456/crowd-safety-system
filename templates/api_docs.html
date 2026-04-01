@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}API Documentation{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-code"></i> Real-Time Alert API Documentation</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <strong>Base URL:</strong> <code>http://127.0.0.1:8000/api/</code>
+                </div>
+                
+                <h5>1. Get Alerts</h5>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <code>GET /api/alerts/</code>
+                        <hr>
+                        <strong>Response:</strong>
+                        <pre class="bg-light p-2">
+{
+  "status": "success",
+  "count": 5,
+  "alerts": [
+    {
+      "id": 1,
+      "title": "High Crowd Density",
+      "message": "Times Square is very crowded",
+      "priority": "high",
+      "location": "Times Square",
+      "latitude": 40.7128,
+      "longitude": -74.0060,
+      "created_at": "2024-03-27 15:30:00",
+      "read": false
+    }
+  ]
+}</pre>
+                    </div>
+                </div>
+                
+                <h5>2. Send Alert (Admin/Security Only)</h5>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <code>POST /api/alerts/</code>
+                        <hr>
+                        <strong>Request Body:</strong>
+                        <pre class="bg-light p-2">
+{
+  "title": "Alert Title",
+  "message": "Alert message",
+  "alert_type": "security",
+  "priority": "high",
+  "location": "Times Square",
+  "latitude": 40.7128,
+  "longitude": -74.0060,
+  "send_to_all": true
+}</pre>
+                        <strong>Response:</strong>
+                        <pre class="bg-light p-2">
+{
+  "status": "success",
+  "alert_id": 123,
+  "message": "Alert sent successfully"
+}</pre>
+                    </div>
+                </div>
+                
+                <h5>3. Trigger Panic</h5>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <code>POST /api/panic/</code>
+                        <hr>
+                        <strong>Request Body:</strong>
+                        <pre class="bg-light p-2">
+{
+  "latitude": 40.7128,
+  "longitude": -74.0060,
+  "message": "Emergency!",
+  "location": "Times Square"
+}</pre>
+                        <strong>Response:</strong>
+                        <pre class="bg-light p-2">
+{
+  "status": "success",
+  "panic_id": 45,
+  "alert_id": 124,
+  "message": "Emergency alert sent!"
+}</pre>
+                    </div>
+                </div>
+                
+                <h5>4. Acknowledge Alert</h5>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <code>POST /api/alerts/&lt;alert_id&gt;/acknowledge/</code>
+                        <hr>
+                        <strong>Response:</strong>
+                        <pre class="bg-light p-2">
+{
+  "status": "success",
+  "message": "Alert acknowledged"
+}</pre>
+                    </div>
+                </div>
+                
+                <h5>5. Get Crowd Data</h5>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <code>GET /api/crowd/</code>
+                        <hr>
+                        <strong>Response:</strong>
+                        <pre class="bg-light p-2">
+{
+  "status": "success",
+  "count": 10,
+  "data": [
+    {
+      "location": "Times Square",
+      "latitude": 40.7128,
+      "longitude": -74.0060,
+      "density": "high",
+      "count": 847,
+      "timestamp": "2024-03-27 15:30:00"
+    }
+  ]
+}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
