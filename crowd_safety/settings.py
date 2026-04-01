@@ -26,7 +26,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap5',
     
-    'import_export',
+    
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
