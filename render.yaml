@@ -9,5 +9,3 @@ services:
         generateValue: true
       - key: DJANGO_DEBUG
         value: false
-      - key: PYTHON_VERSION
-        value: 3.11.0
