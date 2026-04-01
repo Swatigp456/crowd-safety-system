@@ -21,7 +21,7 @@ INSTALLED_APPS = [
     
     # Third party apps
     'rest_framework',
-    'channels',
+    
     'corsheaders',
     'crispy_forms',
     'crispy_bootstrap5',
