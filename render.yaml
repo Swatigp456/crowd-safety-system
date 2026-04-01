@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: crowd-safety-system
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn crowd_safety.wsgi:application
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: false
+      - key: PYTHON_VERSION
+        value: 3.11.0
