@@ -1,4 +1,3 @@
-import dj_database_url
 import os
 from pathlib import Path
 
@@ -144,10 +143,10 @@ ASGI_APPLICATION = 'crowd_safety.asgi.application'
 
 # Database - Use SQLite without GIS
 DATABASES = {
-    'default': dj_database_url.config(
-        default='sqlite:///db.sqlite3',
-        conn_max_age=600
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
 # Comment out Redis for now, use in-memory channel layer
 CHANNEL_LAYERS = {
