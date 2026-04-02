@@ -1,4 +1,3 @@
-# crowd_safety/urls.py
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
@@ -12,8 +11,6 @@ urlpatterns = [
     path('dashboard/', include('dashboard.urls')),
     path('incidents/', include('incidents.urls')),
     path('api/', include('api.urls')),
-    path('ai/', include('ai.urls')),
-    path('ml/', include('ml.urls')),  # Add this line
 ]
 
 if settings.DEBUG:
