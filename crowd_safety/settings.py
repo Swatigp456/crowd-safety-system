@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'api',
     'ai',
     'ml',
-    'webpush',
+    
 ]
 
 WEBPUSH_SETTINGS = {
