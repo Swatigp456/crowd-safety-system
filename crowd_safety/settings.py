@@ -3,12 +3,12 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Security
 SECRET_KEY = 'django-insecure-your-secret-key-here-change-in-production'
-
-DEBUG = True
-
+DEBUG = False
 ALLOWED_HOSTS = ['*']
 
+# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -16,17 +16,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Remove 'django.contrib.gis' from here
-    # 'django.contrib.gis',  # COMMENT THIS OUT
     
     # Third party apps
     'rest_framework',
-    'import_export',
     'corsheaders',
     'crispy_forms',
     'crispy_bootstrap5',
-    
-    
+    'import_export',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -40,54 +36,6 @@ INSTALLED_APPS = [
     'api',
     'ai',
     'ml',
-    
-]
-
-WEBPUSH_SETTINGS = {
-    "VAPID_PUBLIC_KEY": "YOUR_VAPID_PUBLIC_KEY",
-    "VAPID_PRIVATE_KEY": "YOUR_VAPID_PRIVATE_KEY",
-    "VAPID_ADMIN_EMAIL": "admin@crowdsafety.com"
-}
-
-# crowd_safety/settings.py
-
-# WebPush Settings (Test Keys - Replace with your own)
-WEBPUSH_SETTINGS = {
-    "VAPID_PUBLIC_KEY": "BCvFp6wXK8xQ9s2dN5m7pL3kR9jH2tY6uW4aE8bQ1cX7zV9nM2pL5kR7jH8tY6uW4aE8bQ1cX7zV",
-    "VAPID_PRIVATE_KEY": "E8bQ1cX7zV9nM2pL5kR7jH8tY6uW4aE8bQ1cX7zV9nM2pL5kR7jH8tY6uW4a",
-    "VAPID_ADMIN_EMAIL": "admin@crowdsafety.com"
-}
-
-# settings.py
-
-
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Admin customization
-ADMIN_SITE_HEADER = "Crowd Safety Management System"
-ADMIN_SITE_TITLE = "Crowd Safety Admin"
-ADMIN_INDEX_TITLE = "Dashboard"
-
-# Static files
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# Media files
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-# Ensure static files are served in development
-if DEBUG:
-    STATICFILES_DIRS = [BASE_DIR / 'static']
-else:
-    STATIC_ROOT = BASE_DIR / 'staticfiles'
-CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
-CSRF_COOKIE_HTTPONLY = False
-CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:8000',
-    'http://127.0.0.1:8000',
 ]
 
 MIDDLEWARE = [
@@ -121,41 +69,26 @@ TEMPLATES = [
     },
 ]
 
-# Admin customization
-ADMIN_SITE_HEADER = "Crowd Safety Management System"
-ADMIN_SITE_TITLE = "Crowd Safety Admin"
-ADMIN_INDEX_TITLE = "Dashboard"
-
-# Static files
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-ADMIN_MEDIA_PREFIX = '/static/admin/'
-
-# Custom admin site header
-ADMIN_SITE_HEADER = "Crowd Safety Management System"
-ADMIN_SITE_TITLE = "Crowd Safety Admin"
-ADMIN_INDEX_TITLE = "Dashboard"
-
 WSGI_APPLICATION = 'crowd_safety.wsgi.application'
 ASGI_APPLICATION = 'crowd_safety.asgi.application'
 
-# Database - Use SQLite without GIS
+# Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-# Comment out Redis for now, use in-memory channel layer
+
+# Channels
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',
     },
 }
 
-# Password validation
+# Auth
+AUTH_USER_MODEL = 'accounts.User'
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -163,21 +96,16 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-AUTH_USER_MODEL = 'accounts.User'
-
 # Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files
+# Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [BASE_DIR / 'static']
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
@@ -188,65 +116,38 @@ MEDIA_ROOT = BASE_DIR / 'media'
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-# Login/Logout URLs
+# Login/Logout
 LOGIN_URL = 'accounts:login'
 LOGIN_REDIRECT_URL = 'dashboard:index'
 LOGOUT_REDIRECT_URL = 'accounts:login'
 
-# Email settings (for alerts)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Use console for development
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'your-email@gmail.com'
-EMAIL_HOST_PASSWORD = 'your-app-password'
-
-# Twilio settings for SMS (optional)
-TWILIO_ACCOUNT_SID = ''
-TWILIO_AUTH_TOKEN = ''
-TWILIO_PHONE_NUMBER = ''
+# Email
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
 
-# CORS settings
+# CORS
 CORS_ALLOW_ALL_ORIGINS = True
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+    'https://crowd-safety-system.onrender.com',
+]
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# Admin
+ADMIN_SITE_HEADER = "Crowd Safety Management System"
+ADMIN_SITE_TITLE = "Crowd Safety Admin"
+ADMIN_INDEX_TITLE = "Dashboard"
 
-# Add this at the bottom of settings.py
-
-# Gemini AI Configuration
-
-# At the very bottom
+# Gemini AI
 GEMINI_API_KEY = "AIzaSyCb-hltBGfxzKkDdsVN-q5lxm6-VnG5N70"
 
-# Admin customization
-ADMIN_SITE_HEADER = "Crowd Safety Management System"
-ADMIN_SITE_TITLE = "Crowd Safety Admin"
-ADMIN_INDEX_TITLE = "Dashboard"
-
-# Static files
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# Add at the bottom of settings.py
-
-# Admin customization
-ADMIN_SITE_HEADER = "Crowd Safety Management System"
-ADMIN_SITE_TITLE = "Crowd Safety Admin"
-ADMIN_INDEX_TITLE = "Dashboard"
-
-# Static files
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR / 'staticfiles'  # Replace with your real key # Replace with your actual key
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
