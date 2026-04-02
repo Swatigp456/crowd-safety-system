@@ -21,3 +21,4 @@ plotly==5.19.0
 geopy==2.4.1
 django-allauth==0.57.0
 gunicorn==21.2.0
+django-webpush==1.0.0
