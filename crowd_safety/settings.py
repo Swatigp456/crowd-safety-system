@@ -34,8 +34,8 @@ INSTALLED_APPS = [
     'dashboard',
     'incidents',
     'api',
-    'ai',
-    'ml',
+    # 'ai',
+    # 'ml',
 ]
 
 MIDDLEWARE = [
