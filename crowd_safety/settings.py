@@ -21,12 +21,12 @@ INSTALLED_APPS = [
     
     # Third party apps
     'rest_framework',
-    'channels',
+    'import_export',
     'corsheaders',
     'crispy_forms',
     'crispy_bootstrap5',
     
-    'import_export',
+    
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -92,6 +92,7 @@ CSRF_TRUSTED_ORIGINS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -147,7 +148,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 # Comment out Redis for now, use in-memory channel layer
 CHANNEL_LAYERS = {
     'default': {
@@ -175,6 +175,10 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
 MEDIA_URL = '/media/'
